@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Space Roofing Pros — Roofing Contractors South Florida</title>
-<meta name="description" content="Space Roofing Pros is a licensed roofing contractor serving Miami-Dade, Broward, and Palm Beach. Hurricane-rated residential & commercial roofing, repairs, and replacements with transparent pricing." />
+<title>Space Roofing Pros — #1 Residential Roofing Contractor South Florida</title>
+<meta name="description" content="Top roofing company in South Florida — built on trust and quality. Locally serving Miami-Dade, Broward, and Palm Beach with hurricane-rated residential roofing." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -12,31 +12,15 @@
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="container topbar__inner">
-    <div class="topbar__left">
-      <span class="topbar__item"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C8 2 5 5 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg> Miami-Dade · Broward · Palm Beach</span>
-      <span class="topbar__sep">|</span>
-      <span class="topbar__item"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 17.93V18h-2v1.93A8 8 0 0 1 4.07 13H6v-2H4.07A8 8 0 0 1 11 4.07V6h2V4.07A8 8 0 0 1 19.93 11H18v2h1.93A8 8 0 0 1 13 19.93z"/></svg> Mon – Sat 7:00am – 7:00pm</span>
-    </div>
-    <div class="topbar__right">
-      <a href="mailto:info@spaceroofingpros.com" class="topbar__item">info@spaceroofingpros.com</a>
-      <span class="topbar__sep">|</span>
-      <a href="tel:+13055551234" class="topbar__item topbar__phone">📞 (305) 555-1234</a>
-    </div>
-  </div>
-</div>
-
-<!-- HEADER -->
-<header class="header" id="header">
-  <div class="container header__inner">
-    <a href="index.html" class="brand" aria-label="Space Roofing Pros home">
+<!-- HEADER (compact, matches reference) -->
+<header class="topnav" id="header">
+  <div class="container topnav__inner">
+    <a href="index.html" class="brand">
       <span class="brand__mark">
-        <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
-          <path d="M4 26 24 8l20 18-3 3-17-15-17 15z" fill="#e8511d"/>
-          <path d="M8 26h32v14H8z" fill="#0b2a4a"/>
-          <path d="M20 30h8v10h-8z" fill="#e8511d"/>
+        <svg viewBox="0 0 48 48" width="38" height="38" aria-hidden="true">
+          <path d="M4 26 24 8l20 18-3 3-17-15-17 15z" fill="#ff6b35"/>
+          <path d="M8 26h32v14H8z" fill="#0b3a5c"/>
+          <path d="M20 30h8v10h-8z" fill="#ff6b35"/>
         </svg>
       </span>
       <span class="brand__text">
@@ -45,16 +29,20 @@
       </span>
     </a>
 
-    <nav class="nav" id="nav">
-      <a href="index.html" class="nav__link is-active">Home</a>
-      <a href="services.html" class="nav__link">Services</a>
-      <a href="about.html" class="nav__link">About</a>
-      <a href="#service-area" class="nav__link">Service Area</a>
-      <a href="#testimonials" class="nav__link">Reviews</a>
-      <a href="contact.html" class="nav__link">Contact</a>
+    <nav class="topnav__links" id="nav">
+      <a href="index.html" class="topnav__link is-active">Home</a>
+      <a href="services.html" class="topnav__link">Services</a>
+      <a href="about.html" class="topnav__link">About</a>
+      <a href="#reviews" class="topnav__link">Reviews</a>
+      <a href="#faq" class="topnav__link">FAQ</a>
+      <a href="contact.html" class="topnav__link">Contact</a>
     </nav>
 
-    <a href="contact.html" class="btn btn--primary btn--header">Free Estimate</a>
+    <div class="topnav__cta">
+      <a href="#quote" class="btn btn--primary btn--sm">Get Free Quote</a>
+      <a href="tel:+13055551234" class="btn btn--ghost-dark btn--sm">📞 Call Now</a>
+    </div>
+
     <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -62,312 +50,365 @@
 </header>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero__bg" aria-hidden="true"></div>
-  <div class="hero__overlay" aria-hidden="true"></div>
-  <div class="container hero__inner">
-    <div class="hero__content">
-      <span class="eyebrow">Licensed · Bonded · Insured</span>
-      <h1 class="hero__title">Roofing Contractors You Can <span class="accent">Trust</span> in South Florida</h1>
-      <p class="hero__lead">From asphalt shingles to tile, metal, and TPO flat roofs — Space Roofing Pros delivers hurricane-rated craftsmanship, transparent pricing, and lasting protection from sun, salt, and storms.</p>
-      <div class="hero__ctas">
-        <a href="contact.html" class="btn btn--primary btn--lg">Get a Free Inspection</a>
-        <a href="tel:+13055551234" class="btn btn--ghost btn--lg">📞 (305) 555-1234</a>
+<section class="hero-v2">
+  <div class="hero-v2__bg" aria-hidden="true"></div>
+  <div class="hero-v2__shade" aria-hidden="true"></div>
+
+  <div class="container hero-v2__inner">
+    <div class="hero-v2__copy">
+      <span class="ribbon">⭐ Locally Trusted Since 2010</span>
+      <h1 class="hero-v2__title">
+        <span class="hero-v2__rank">#1 Residential Roofing Contractor</span>
+        <span class="hero-v2__region">South Florida</span>
+      </h1>
+      <p class="hero-v2__tag">Top Roofing Company · Built On Trust And Quality</p>
+      <p class="hero-v2__sub">Locally serving Miami-Dade, Broward, Palm Beach &amp; nearby areas. Hurricane-rated residential roofing with fast response times and GAF-certified workmanship.</p>
+
+      <div class="hero-v2__ctas">
+        <a href="#quote" class="btn btn--primary btn--lg">Book a Free Consultation</a>
+        <a href="tel:+13055551234" class="btn btn--white-outline btn--lg">📞 (305) 555-1234</a>
       </div>
-      <ul class="hero__bullets">
-        <li>✓ No-obligation roof inspection</li>
-        <li>✓ 25-year workmanship warranty</li>
-        <li>✓ Same-day emergency service</li>
-      </ul>
+
+      <div class="hero-v2__trust">
+        <span>✓ Licensed &amp; Insured</span>
+        <span>✓ Free Inspections</span>
+        <span>✓ 24/7 Emergency</span>
+      </div>
     </div>
-    <div class="hero__card">
-      <h3>Request a Free Quote</h3>
-      <p>Tell us about your project — we’ll respond within one business hour.</p>
+
+    <aside class="quote-card" id="quote">
+      <h3>Get Your Free Roofing Quote!</h3>
+      <p>Tell us about your roof — we’ll respond within one business hour.</p>
       <form class="form" onsubmit="event.preventDefault(); this.reset(); document.getElementById('formThanks').hidden=false;">
+        <input type="text" name="name" placeholder="Full name" required />
+        <input type="email" name="email" placeholder="Email address" required />
         <div class="form__row">
-          <input type="text" name="name" placeholder="Full name" required />
+          <input type="text" name="zip" placeholder="Zip code" pattern="[0-9]{5}" required />
           <input type="tel" name="phone" placeholder="Phone" required />
         </div>
-        <input type="email" name="email" placeholder="Email address" required />
-        <select name="service" required>
-          <option value="">Select a service…</option>
-          <option>Roof Inspection</option>
-          <option>Roof Repair</option>
-          <option>Roof Replacement</option>
-          <option>New Construction</option>
-          <option>Emergency Service</option>
-        </select>
-        <textarea name="message" rows="3" placeholder="Briefly describe the project"></textarea>
-        <button type="submit" class="btn btn--primary btn--block">Get My Free Estimate</button>
+        <button type="submit" class="btn btn--primary btn--block btn--lg">Book a Free Consultation</button>
         <p class="form__thanks" id="formThanks" hidden>✓ Thanks! We’ll be in touch shortly.</p>
       </form>
-    </div>
+    </aside>
   </div>
 </section>
 
-<!-- TRUST BAR -->
-<section class="trust">
-  <div class="container trust__inner">
-    <div class="trust__item"><strong>15+</strong><span>Years in business</span></div>
-    <div class="trust__item"><strong>2,400+</strong><span>Roofs completed</span></div>
-    <div class="trust__item"><strong>4.9★</strong><span>Google reviews</span></div>
-    <div class="trust__item"><strong>A+</strong><span>BBB rating</span></div>
-    <div class="trust__item"><strong>25-yr</strong><span>Workmanship warranty</span></div>
+<!-- TRUST LOGOS BAR -->
+<section class="logos-bar">
+  <div class="container logos-bar__inner">
+    <div class="logo-pill"><strong>Yelp</strong><small>5.0 ★</small></div>
+    <div class="logo-pill"><strong>houzz</strong><small>Pro Verified</small></div>
+    <div class="logo-pill"><strong>Angi</strong><small>Top Rated</small></div>
+    <div class="logo-pill"><strong>GAF</strong><small>Master Elite</small></div>
+    <div class="logo-pill"><strong>Owens Corning</strong><small>Preferred</small></div>
   </div>
 </section>
 
-<!-- SERVICES -->
-<section class="section" id="services">
-  <div class="container">
-    <div class="section__head">
-      <span class="eyebrow">What we do</span>
-      <h2>Full-Service Roofing for Homes &amp; Businesses</h2>
-      <p>We handle every type of residential and commercial roof — from minor tune-ups to full tear-offs and replacements. Our craftsmen are factory-trained and certified across the materials we install.</p>
-    </div>
-
-    <div class="services">
-      <article class="service-card">
-        <div class="service-card__icon" aria-hidden="true">🏠</div>
-        <h3>Asphalt Shingle Roofs</h3>
-        <p>Architectural and dimensional shingles from GAF, Owens Corning, and CertainTeed — engineered for Florida sun, wind, and humidity.</p>
-        <a href="services.html#shingles" class="link">Learn more →</a>
-      </article>
-
-      <article class="service-card">
-        <div class="service-card__icon" aria-hidden="true">🧱</div>
-        <h3>Tile Roofing</h3>
-        <p>Clay and concrete tile installation, repair, and re-felting that protects beauty and value for 50+ years.</p>
-        <a href="services.html#tile" class="link">Learn more →</a>
-      </article>
-
-      <article class="service-card">
-        <div class="service-card__icon" aria-hidden="true">⚙️</div>
-        <h3>Metal Roofing</h3>
-        <p>Standing seam, stone-coated steel, and copper systems built for energy efficiency and a clean modern look.</p>
-        <a href="services.html#metal" class="link">Learn more →</a>
-      </article>
-
-      <article class="service-card">
-        <div class="service-card__icon" aria-hidden="true">☀️</div>
-        <h3>Cool Roofs</h3>
-        <p>Energy Star reflective roofing that lowers cooling costs and earns FPL and PACE rebates across South Florida.</p>
-        <a href="services.html#cool" class="link">Learn more →</a>
-      </article>
-
-      <article class="service-card">
-        <div class="service-card__icon" aria-hidden="true">🔥</div>
-        <h3>Torch Down &amp; Flat Roofs</h3>
-        <p>Modified bitumen, TPO, and built-up systems for low-slope residential and commercial properties.</p>
-        <a href="services.html#flat" class="link">Learn more →</a>
-      </article>
-
-      <article class="service-card">
-        <div class="service-card__icon" aria-hidden="true">🛠️</div>
-        <h3>Roof Tune-Ups &amp; Repairs</h3>
-        <p>Leak repairs, flashing, ventilation, and preventive maintenance to add years to your existing roof.</p>
-        <a href="services.html#repair" class="link">Learn more →</a>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ABOUT / WHY US SPLIT -->
-<section class="split">
-  <div class="container split__inner">
-    <div class="split__media" aria-hidden="true">
-      <div class="split__img"></div>
-      <div class="split__badge">
-        <strong>15+ years</strong>
-        <span>protecting South Florida homes</span>
-      </div>
-    </div>
-    <div class="split__content">
-      <span class="eyebrow">Why Space Roofing Pros</span>
-      <h2>Craftsmanship that respects your home and your budget</h2>
-      <p>We started Space Roofing Pros to do roofing the right way: clear estimates, honest timelines, and a clean job site at the end of every day. Our crews are W-2 employees — never day labor — and every project is led by a senior foreman who walks the roof with you before and after.</p>
-      <ul class="checklist">
-        <li>Free, no-pressure inspections with photo report</li>
-        <li>Manufacturer-certified installers (GAF, CertainTeed, Owens Corning)</li>
-        <li>Transparent pricing — no surprise change orders</li>
-        <li>25-year labor warranty on all replacements</li>
-        <li>Fully licensed (FL CCC #1331234), bonded, and insured</li>
+<!-- PROMO STRIP -->
+<section class="promo">
+  <div class="container promo__inner">
+    <div class="promo__text">
+      <h2>Claim All Your Roofing Perks Today!</h2>
+      <p class="promo__lede">Save thousands &amp; enjoy special-discount perks:</p>
+      <ul class="promo__list">
+        <li>Up to <strong>$1,500 off</strong> qualifying re-roof projects</li>
+        <li>Free gutter cleaning with every new full installation</li>
+        <li>Free inspection &amp; complimentary leak check</li>
+        <li>Top-quality roofing &amp; special-rate financing</li>
+        <li>Flexible options to fit any budget</li>
       </ul>
-      <div class="split__ctas">
-        <a href="about.html" class="btn btn--primary">More About Us</a>
-        <a href="contact.html" class="btn btn--outline">Schedule Inspection</a>
+      <a href="#quote" class="btn btn--primary btn--lg">Book a Free Consultation</a>
+    </div>
+    <div class="promo__media">
+      <div class="promo__img promo__img--1"></div>
+      <div class="promo__img promo__img--2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER -->
+<section class="section">
+  <div class="container">
+    <h2 class="section__title section__title--center">Before &amp; After</h2>
+    <div class="ba-grid">
+      <div class="ba">
+        <div class="ba__half ba__half--before"><span class="ba__tag">BEFORE</span></div>
+        <div class="ba__half ba__half--after"><span class="ba__tag ba__tag--after">AFTER</span></div>
+      </div>
+      <div class="ba">
+        <div class="ba__half ba__half--before ba__half--b2"><span class="ba__tag">BEFORE</span></div>
+        <div class="ba__half ba__half--after ba__half--a2"><span class="ba__tag ba__tag--after">AFTER</span></div>
+      </div>
+      <div class="ba">
+        <div class="ba__half ba__half--before ba__half--b3"><span class="ba__tag">BEFORE</span></div>
+        <div class="ba__half ba__half--after ba__half--a3"><span class="ba__tag ba__tag--after">AFTER</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PROCESS -->
+<!-- WHY CHOOSE US -->
 <section class="section section--alt">
   <div class="container">
-    <div class="section__head section__head--center">
-      <span class="eyebrow">Our process</span>
-      <h2>A simple, predictable roofing experience</h2>
-      <p>From the first phone call to the final walk-through, you’ll always know what’s next.</p>
+    <h2 class="section__title">Why Choose Us?</h2>
+    <p class="section__sub">We proudly serve our local community of Miami-Dade, Broward, Palm Beach &amp; nearby regions, delivering top-notch roofing and care with one solid commitment.</p>
+
+    <div class="why">
+      <div class="why__item">
+        <div class="why__icon">📋</div>
+        <div>
+          <h3>Free Estimates</h3>
+          <p>No-obligation inspections and transparent pricing, so you can plan with confidence.</p>
+        </div>
+      </div>
+      <div class="why__item">
+        <div class="why__icon">🛠️</div>
+        <div>
+          <h3>Experienced Professionals</h3>
+          <p>Our skilled team brings years of expertise to every project, delivering results you can trust.</p>
+        </div>
+      </div>
+      <div class="why__item">
+        <div class="why__icon">🏆</div>
+        <div>
+          <h3>Installation &amp; Material Quality</h3>
+          <p>With us, quality is guaranteed — we’re committed to delivering a service you can rely on.</p>
+        </div>
+      </div>
     </div>
 
-    <ol class="process">
-      <li class="process__step">
-        <span class="process__num">01</span>
-        <h3>Free Inspection</h3>
-        <p>We climb the roof, document conditions with photos, and explain what we find — no obligation.</p>
-      </li>
-      <li class="process__step">
-        <span class="process__num">02</span>
-        <h3>Transparent Quote</h3>
-        <p>You receive a flat-rate, written proposal with material options, timelines, and warranty details.</p>
-      </li>
-      <li class="process__step">
-        <span class="process__num">03</span>
-        <h3>Professional Install</h3>
-        <p>Our W-2 crews protect landscaping, install per manufacturer specs, and clean up daily.</p>
-      </li>
-      <li class="process__step">
-        <span class="process__num">04</span>
-        <h3>Final Walk-Through</h3>
-        <p>We complete a punch-list with you, hand over warranty documents, and stand behind our work.</p>
-      </li>
-    </ol>
+    <div class="section__cta-center">
+      <a href="#quote" class="btn btn--primary btn--lg">Book a Free Consultation</a>
+    </div>
   </div>
 </section>
 
-<!-- SERVICE AREA -->
-<section class="section" id="service-area">
+<!-- WE TAKE PRIDE -->
+<section class="pride">
   <div class="container">
-    <div class="section__head section__head--center">
-      <span class="eyebrow">Where we work</span>
-      <h2>Proudly serving South Florida</h2>
-      <p>Local crews, fast response, and deep familiarity with regional building codes.</p>
+    <h2 class="section__title section__title--center section__title--light">We Take Pride In Our Work</h2>
+    <div class="pride__grid">
+      <div class="pride__photo pride__photo--1"></div>
+      <div class="pride__photo pride__photo--2"></div>
     </div>
-
-    <div class="areas">
-      <div class="areas__col">
-        <h4>Miami-Dade County</h4>
-        <ul>
-          <li>Miami</li><li>Coral Gables</li><li>Doral</li><li>Aventura</li>
-          <li>Miami Beach</li><li>Hialeah</li><li>Kendall</li><li>Homestead</li>
-        </ul>
-      </div>
-      <div class="areas__col">
-        <h4>Broward County</h4>
-        <ul>
-          <li>Fort Lauderdale</li><li>Hollywood</li><li>Pembroke Pines</li><li>Davie</li>
-          <li>Coral Springs</li><li>Pompano Beach</li><li>Weston</li><li>Plantation</li>
-        </ul>
-      </div>
-      <div class="areas__col">
-        <h4>Palm Beach County</h4>
-        <ul>
-          <li>West Palm Beach</li><li>Boca Raton</li><li>Delray Beach</li><li>Boynton Beach</li>
-          <li>Wellington</li><li>Jupiter</li><li>Palm Beach Gardens</li><li>Lake Worth</li>
-        </ul>
-      </div>
+    <div class="section__cta-center">
+      <a href="#quote" class="btn btn--primary btn--lg">Book a Free Consultation</a>
     </div>
   </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section class="section section--dark" id="testimonials">
+<!-- GALLERY -->
+<section class="gallery">
+  <div class="container gallery__grid">
+    <div class="gallery__cell gallery__cell--1"></div>
+    <div class="gallery__cell gallery__cell--2"></div>
+    <div class="gallery__cell gallery__cell--3"></div>
+    <div class="gallery__cell gallery__cell--4"></div>
+    <div class="gallery__cell gallery__cell--5"></div>
+    <div class="gallery__cell gallery__cell--6"></div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="section" id="reviews">
   <div class="container">
-    <div class="section__head section__head--center">
-      <span class="eyebrow eyebrow--light">Reviews</span>
-      <h2>Homeowners and business owners trust us</h2>
+    <div class="reviews-grid">
+      <article class="g-review">
+        <div class="g-review__head">
+          <span class="g-review__avatar" style="background:#1a73e8">A</span>
+          <div>
+            <strong>Adam M.</strong>
+            <span class="g-review__src">★★★★★ · Google</span>
+          </div>
+        </div>
+        <p>“Needed a new roof before hitting my house for sale. The crew was honest on time and the inspectors were impressed.”</p>
+      </article>
+      <article class="g-review">
+        <div class="g-review__head">
+          <span class="g-review__avatar" style="background:#ea4335">J</span>
+          <div>
+            <strong>Jenny M.</strong>
+            <span class="g-review__src">★★★★★ · Google</span>
+          </div>
+        </div>
+        <p>“We had a hidden leak for years. The Space Roofing team found it fast in three places. Super professional and reliable!”</p>
+      </article>
+      <article class="g-review">
+        <div class="g-review__head">
+          <span class="g-review__avatar" style="background:#34a853">S</span>
+          <div>
+            <strong>Sara C.</strong>
+            <span class="g-review__src">★★★★★ · Google</span>
+          </div>
+        </div>
+        <p>“Our old roof was 20 years old and it had it. They and the guys handled the tear-off, breakdown and a replacement in two days. The new roof completely changed the look of our home.”</p>
+      </article>
+    </div>
+    <div class="reviews-dots" aria-hidden="true">
+      <span class="dot"></span><span class="dot dot--active"></span><span class="dot"></span>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<section class="stats">
+  <div class="container stats__inner">
+    <div class="stat"><strong>458+</strong><span>Projects Completed</span></div>
+    <div class="stat"><strong>20+</strong><span>Years of Experience</span></div>
+    <div class="stat"><strong>421+</strong><span>Satisfied Customers</span></div>
+  </div>
+</section>
+
+<!-- OUR SERVICES -->
+<section class="section">
+  <div class="container">
+    <h2 class="section__title section__title--center">Our Services</h2>
+
+    <div class="svc-grid">
+      <article class="svc">
+        <div class="svc__icon">🔍</div>
+        <h3>Roof Inspections</h3>
+        <p>A complete top-to-bottom evaluation that identifies leaks, damaged flashing, and aging materials before they fail.</p>
+      </article>
+      <article class="svc">
+        <div class="svc__icon">🛠️</div>
+        <h3>Roof Repair</h3>
+        <p>From minor shingle replacements to major leak repairs — fast, durable, and clean fixes that keep your roof tight.</p>
+      </article>
+      <article class="svc">
+        <div class="svc__icon">🏠</div>
+        <h3>Roof Installation</h3>
+        <p>Full residential re-roofs and new construction installs using top-tier shingles, tile, metal, and TPO systems.</p>
+      </article>
+      <article class="svc">
+        <div class="svc__icon">🧰</div>
+        <h3>Roof Maintenance</h3>
+        <p>Scheduled tune-ups that extend roof life — sealing, ventilation checks, and minor preventive repairs.</p>
+      </article>
+      <article class="svc">
+        <div class="svc__icon">🌪️</div>
+        <h3>Storm Damage &amp; Wind Repair</h3>
+        <p>We quickly repair storm and wind damage, so your home is protected before the next event.</p>
+      </article>
+      <article class="svc">
+        <div class="svc__icon">☀️</div>
+        <h3>Skylight Installation</h3>
+        <p>Brighten your home with leak-tight skylight installation. We work with curb-mount and deck-mount Velux units.</p>
+      </article>
+      <article class="svc">
+        <div class="svc__icon">🚨</div>
+        <h3>Emergency Roof Repair</h3>
+        <p>Severe damage to a roof can put your home at risk. We respond fast with emergency tarp and dry-in service.</p>
+      </article>
+      <article class="svc">
+        <div class="svc__icon">⚙️</div>
+        <h3>Roof Tune-Up</h3>
+        <p>Keep your roof in top shape with our roof tune-up service — minor repairs, sealing, and small maintenance to extend its life.</p>
+      </article>
     </div>
 
-    <div class="reviews">
-      <article class="review">
-        <div class="review__stars">★★★★★</div>
-        <p>“Space Roofing Pros replaced our 1960s barrel-tile roof in Coral Gables. The crew was respectful, fast, and the final result is stunning. They beat the other quotes and delivered better materials.”</p>
-        <footer><strong>Jennifer M.</strong> · Coral Gables, FL</footer>
+    <div class="section__cta-center">
+      <a href="#quote" class="btn btn--primary btn--lg">Book a Free Consultation</a>
+    </div>
+  </div>
+</section>
+
+<!-- ROOFING SYSTEMS WE USE -->
+<section class="section section--alt">
+  <div class="container">
+    <h2 class="section__title section__title--center">Roofing Systems We Use</h2>
+    <div class="materials">
+      <article class="material">
+        <div class="material__img material__img--shingle"></div>
+        <h3>Asphalt Shingle</h3>
+        <p>Architectural shingles with high tear strength and wind warranties up to 150 mph — perfect for South Florida.</p>
       </article>
-      <article class="review">
-        <div class="review__stars">★★★★★</div>
-        <p>“Had a major leak after Hurricane Idalia. They were on the roof the next morning, found three issues the last roofer missed, and made it right. Honest people.”</p>
-        <footer><strong>Daniel R.</strong> · Fort Lauderdale, FL</footer>
+      <article class="material">
+        <div class="material__img material__img--tile"></div>
+        <h3>Tile</h3>
+        <p>Our cool clay tile reflects sun, resists moisture, and brings classic Mediterranean charm to any home.</p>
       </article>
-      <article class="review">
-        <div class="review__stars">★★★★★</div>
-        <p>“We needed a TPO cool roof on our Boca Raton warehouse. Project finished a day early, on budget, and our cooling bill dropped almost 30% the first month.”</p>
-        <footer><strong>A. Patel</strong> · Boca Raton, FL</footer>
+      <article class="material">
+        <div class="material__img material__img--tile-roof"></div>
+        <h3>Tile Roof</h3>
+        <p>Durable lightweight concrete tile roofs — heat-reflective, energy-efficient, and ideal for residential and commercial use.</p>
+      </article>
+      <article class="material">
+        <div class="material__img material__img--metal"></div>
+        <h3>Metal Roofing</h3>
+        <p>With Kynar-coated metal panels and salt-air-resistant finishes, our metal roofs go the distance in coastal climates.</p>
       </article>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="cta">
-  <div class="container cta__inner">
-    <div>
-      <h2>Ready for a roof that lasts?</h2>
-      <p>Book your free inspection today — most quotes are delivered within 24 hours.</p>
-    </div>
-    <div class="cta__buttons">
-      <a href="contact.html" class="btn btn--primary btn--lg">Free Estimate</a>
-      <a href="tel:+13055551234" class="btn btn--ghost btn--lg">Call (305) 555-1234</a>
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container faq-wrap">
+    <h2 class="section__title section__title--center">FAQ’s</h2>
+
+    <div class="faq">
+      <details class="faq__item" open>
+        <summary>How do I know if my roof needs repair or replacement?</summary>
+        <p>Signs like missing or curled shingles, sagging, or visible interior leaks indicate it’s time for a professional inspection. Our experts can evaluate your roof and recommend the best solution for long-term protection.</p>
+      </details>
+      <details class="faq__item">
+        <summary>What types of roofing materials do you work with?</summary>
+        <p>We install asphalt shingles, clay and concrete tile, standing-seam and stone-coated metal, TPO, and modified-bitumen flat-roof systems — every option matched to your home and budget.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Can you handle emergency roofing repairs?</summary>
+        <p>Yes — we offer 24/7 emergency tarp and dry-in service across Miami-Dade, Broward, and Palm Beach. Most calls receive on-site response the same day.</p>
+      </details>
+      <details class="faq__item">
+        <summary>Do you provide warranties on your work?</summary>
+        <p>Every replacement comes with our 25-year workmanship warranty plus full manufacturer coverage on materials. Repairs include a transferable craftsmanship guarantee.</p>
+      </details>
+      <details class="faq__item">
+        <summary>How do I schedule a roof inspection?</summary>
+        <p>Call <a href="tel:+13055551234">(305) 555-1234</a> or use the form above. We typically schedule inspections within 48 hours, free of charge.</p>
+      </details>
     </div>
   </div>
 </section>
 
 <!-- FOOTER -->
-<footer class="footer">
-  <div class="container footer__inner">
-    <div class="footer__col">
-      <a href="index.html" class="brand brand--footer">
-        <span class="brand__mark">
-          <svg viewBox="0 0 48 48" width="36" height="36" aria-hidden="true">
-            <path d="M4 26 24 8l20 18-3 3-17-15-17 15z" fill="#e8511d"/>
-            <path d="M8 26h32v14H8z" fill="#ffffff"/>
-            <path d="M20 30h8v10h-8z" fill="#e8511d"/>
-          </svg>
-        </span>
-        <span class="brand__text">
-          <span class="brand__name">Space Roofing</span>
-          <span class="brand__sub">P R O S</span>
-        </span>
-      </a>
-      <p>Family-owned roofing contractor delivering quality roofs across Miami-Dade, Broward, and Palm Beach since 2010.</p>
-      <p class="footer__lic">FL License #CCC1331234 · Bonded &amp; Insured</p>
+<footer class="footer-v2">
+  <div class="container footer-v2__inner">
+    <a href="index.html" class="brand brand--footer">
+      <span class="brand__mark">
+        <svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+          <path d="M4 26 24 8l20 18-3 3-17-15-17 15z" fill="#ff6b35"/>
+          <path d="M8 26h32v14H8z" fill="#ffffff"/>
+          <path d="M20 30h8v10h-8z" fill="#ff6b35"/>
+        </svg>
+      </span>
+      <span class="brand__text">
+        <span class="brand__name">Space Roofing</span>
+        <span class="brand__sub">P R O S</span>
+      </span>
+    </a>
+    <p class="footer-v2__tag">Proudly serving people &amp; communities of Miami-Dade, Broward &amp; Palm Beach with trust, dedication, and commitment.</p>
+
+    <div class="footer-v2__links">
+      <a href="services.html">Services</a>
+      <a href="about.html">About</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#faq">FAQ</a>
+      <a href="contact.html">Contact</a>
     </div>
 
-    <div class="footer__col">
-      <h4>Services</h4>
-      <ul>
-        <li><a href="services.html#shingles">Asphalt Shingles</a></li>
-        <li><a href="services.html#tile">Tile Roofs</a></li>
-        <li><a href="services.html#metal">Metal Roofs</a></li>
-        <li><a href="services.html#cool">Cool Roofs</a></li>
-        <li><a href="services.html#flat">Flat &amp; Torch Down</a></li>
-        <li><a href="services.html#repair">Repairs &amp; Tune-Ups</a></li>
-      </ul>
-    </div>
-
-    <div class="footer__col">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="about.html">About</a></li>
-        <li><a href="#service-area">Service Area</a></li>
-        <li><a href="#testimonials">Reviews</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-    </div>
-
-    <div class="footer__col">
-      <h4>Contact</h4>
-      <ul class="footer__contact">
-        <li>📞 <a href="tel:+13055551234">(305) 555-1234</a></li>
-        <li>✉ <a href="mailto:info@spaceroofingpros.com">info@spaceroofingpros.com</a></li>
-        <li>📍 1450 Brickell Ave, Suite 200, Miami, FL 33131</li>
-        <li>🕒 Mon – Sat 7am – 7pm</li>
-      </ul>
+    <div class="footer-v2__contact">
+      <a href="tel:+13055551234">📞 (305) 555-1234</a>
+      <a href="mailto:info@spaceroofingpros.com">✉ info@spaceroofingpros.com</a>
+      <span>📍 1450 Brickell Ave, Suite 200, Miami, FL 33131</span>
     </div>
   </div>
-  <div class="footer__bottom">
-    <div class="container footer__bottom-inner">
-      <span>© <span id="year"></span> Space Roofing Pros. All rights reserved.</span>
-      <span><a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Sitemap</a></span>
+
+  <div class="footer-v2__bottom">
+    <div class="container footer-v2__bottom-inner">
+      <span>© <span id="year"></span> Space Roofing Pros. All rights reserved. · FL License #CCC1331234</span>
+      <span><a href="#">Privacy Policy</a> · <a href="#">Terms &amp; Conditions</a></span>
     </div>
   </div>
 </footer>

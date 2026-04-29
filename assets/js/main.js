@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  // Mobile nav toggle
+  // Mobile nav toggle (works for both legacy .nav and v2 .topnav__links)
   const toggle = document.getElementById('navToggle');
   const nav = document.getElementById('nav');
   if (toggle && nav) {
@@ -9,8 +9,6 @@
       const open = nav.classList.toggle('is-open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-
-    // Close menu when a link is clicked (mobile)
     nav.addEventListener('click', function (e) {
       if (e.target.closest('a') && nav.classList.contains('is-open')) {
         nav.classList.remove('is-open');
@@ -33,4 +31,16 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
+
+  // FAQ accordion: keep one open at a time
+  const faqItems = document.querySelectorAll('.faq__item');
+  faqItems.forEach(function (item) {
+    item.addEventListener('toggle', function () {
+      if (item.open) {
+        faqItems.forEach(function (other) {
+          if (other !== item) other.open = false;
+        });
+      }
+    });
+  });
 })();
