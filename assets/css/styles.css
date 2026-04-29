@@ -1358,3 +1358,111 @@ p { margin: 0 0 1em; color: var(--slate); }
 .footer-v2 .brand__name { font-size: 1.5rem; color: #fff; }
 .footer-v2 .brand__sub  { color: var(--orange); }
 .footer-v2__tag { max-width: 600px; margin: 8px auto 24px; }
+
+/* =================================================================
+   v4 — real imagery (Lorem Picsum seeded URLs, CC0)
+   ================================================================= */
+
+/* Hero shingled-roof background photo */
+.hero-v2__bg {
+  background:
+    linear-gradient(180deg, rgba(8,28,48,.55) 0%, rgba(8,28,48,.85) 100%),
+    url('https://picsum.photos/seed/shinglesroof/1920/1080') center/cover no-repeat,
+    #2a1f15;
+  background-blend-mode: multiply, normal, normal;
+}
+
+/* Hero copy: bigger, tighter headline like reference */
+.hero-v2 { padding: 100px 0 120px; }
+.hero-v2__title {
+  font-size: clamp(2.6rem, 6.4vw, 5rem);
+  font-weight: 900;
+  line-height: .95;
+  letter-spacing: -.01em;
+  margin-bottom: 0;
+}
+.hero-v2__title span { display: block; margin-bottom: 2px; }
+.hero-v2__title .hero-v2__region {
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  margin-top: 6px;
+  letter-spacing: -.005em;
+}
+
+/* Promo photos */
+.promo__img--1 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.25)),
+    url('https://picsum.photos/seed/roofcrew1/600/600') center/cover no-repeat,
+    #51422f;
+}
+.promo__img--2 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.25)),
+    url('https://picsum.photos/seed/roofcrew2/600/600') center/cover no-repeat,
+    #3e423a;
+}
+
+/* Before / After */
+.ba__half--before {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35)),
+    url('https://picsum.photos/seed/before1/600/450') center/cover no-repeat,
+    #4a4032;
+}
+.ba__half--after {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.3)),
+    url('https://picsum.photos/seed/after1/600/450') center/cover no-repeat,
+    #2c5784;
+}
+.ba__half--b2 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35)),
+    url('https://picsum.photos/seed/before2/600/450') center/cover no-repeat;
+  filter: none;
+}
+.ba__half--a2 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.3)),
+    url('https://picsum.photos/seed/after2/600/450') center/cover no-repeat;
+  filter: none;
+}
+.ba__half--b3 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.35)),
+    url('https://picsum.photos/seed/before3/600/450') center/cover no-repeat;
+  filter: none;
+}
+.ba__half--a3 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.3)),
+    url('https://picsum.photos/seed/after3/600/450') center/cover no-repeat;
+  filter: none;
+}
+
+/* Pride photos */
+.pride__photo--1 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.4)),
+    url('https://picsum.photos/seed/pride1/1200/675') center/cover no-repeat;
+}
+.pride__photo--2 {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.1), rgba(0,0,0,.4)),
+    url('https://picsum.photos/seed/pride2/1200/675') center/cover no-repeat;
+}
+
+/* Gallery */
+.gallery__cell--1 { background: url('https://picsum.photos/seed/gal1/600/450') center/cover no-repeat, #3a2c20; }
+.gallery__cell--2 { background: url('https://picsum.photos/seed/gal2/600/450') center/cover no-repeat, #2c3a4f; }
+.gallery__cell--3 { background: url('https://picsum.photos/seed/gal3/600/450') center/cover no-repeat, #3f2e22; }
+.gallery__cell--4 { background: url('https://picsum.photos/seed/gal4/600/450') center/cover no-repeat, #3e2f22; }
+.gallery__cell--5 { background: url('https://picsum.photos/seed/gal5/600/450') center/cover no-repeat, #2c2f29; }
+.gallery__cell--6 { background: url('https://picsum.photos/seed/gal6/600/450') center/cover no-repeat, #4a3a2c; }
+
+/* Material swatches */
+.material__img--shingle  { background: url('https://picsum.photos/seed/matshingle/600/300') center/cover no-repeat, #3a2b20; }
+.material__img--tile     { background: url('https://picsum.photos/seed/mattile/600/300') center/cover no-repeat, #8e3717; }
+.material__img--tile-roof{ background: url('https://picsum.photos/seed/mattileroof/600/300') center/cover no-repeat, #9c452a; }
+.material__img--metal    { background: url('https://picsum.photos/seed/matmetal/600/300') center/cover no-repeat, #3f4651; }
+.material__img--torch    { background: url('https://picsum.photos/seed/mattorch/600/300') center/cover no-repeat, #1c1a18; }
