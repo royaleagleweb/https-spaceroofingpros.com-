@@ -3,17 +3,19 @@
    ============================================================ */
 
 :root {
-  --navy: #0b2a4a;
-  --navy-2: #0f3a66;
-  --orange: #e8511d;
-  --orange-2: #c43e0f;
-  --ink: #14202e;
+  --navy: #0b3a5c;
+  --navy-2: #0f4d77;
+  --teal: #14a6a0;
+  --orange: #ff6b35;
+  --orange-2: #d94d1c;
+  --sand: #fff5ec;
+  --ink: #112233;
   --slate: #475569;
   --muted: #6b7280;
   --line: #e5e7eb;
   --bg: #ffffff;
-  --bg-alt: #f5f7fb;
-  --bg-dark: #0a1f37;
+  --bg-alt: #f3f7fa;
+  --bg-dark: #082a47;
   --radius: 14px;
   --radius-sm: 8px;
   --shadow-sm: 0 2px 6px rgba(11,42,74,.08);
@@ -226,9 +228,9 @@ p { margin: 0 0 1em; color: var(--slate); }
 .hero__bg {
   position: absolute; inset: 0; z-index: -2;
   background:
-    radial-gradient(1200px 600px at 20% 20%, rgba(232,81,29,.18), transparent 60%),
-    radial-gradient(900px 600px at 90% 80%, rgba(15,58,102,.7), transparent 60%),
-    linear-gradient(180deg, #0a1f37 0%, #0b2a4a 60%, #102f54 100%);
+    radial-gradient(1200px 600px at 18% 20%, rgba(255,107,53,.22), transparent 60%),
+    radial-gradient(900px 600px at 90% 85%, rgba(20,166,160,.35), transparent 60%),
+    linear-gradient(180deg, #082a47 0%, #0b3a5c 55%, #0f4d77 100%);
 }
 .hero__bg::after {
   content: ''; position: absolute; inset: 0; opacity: .25;
@@ -552,8 +554,9 @@ p { margin: 0 0 1em; color: var(--slate); }
 /* ============== Page hero (interior pages) ============== */
 .page-hero {
   background:
-    radial-gradient(900px 400px at 80% 0%, rgba(232,81,29,.25), transparent 60%),
-    linear-gradient(180deg, #0a1f37, #0b2a4a);
+    radial-gradient(700px 360px at 12% 100%, rgba(20,166,160,.35), transparent 60%),
+    radial-gradient(900px 400px at 80% 0%, rgba(255,107,53,.28), transparent 60%),
+    linear-gradient(180deg, #082a47, #0b3a5c);
   color: #fff;
   padding: 88px 0 64px;
   text-align: center;
