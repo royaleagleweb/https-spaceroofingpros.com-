@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>בוט חוזים — Space Roofing Pros</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/contract-bot.css" />
+</head>
+<body>
+
+<div class="appbar">
+  <div class="appbar__brand">
+    <svg viewBox="0 0 48 48" width="30" height="30" aria-hidden="true"><path d="M4 26 24 8l20 18-3 3-17-15-17 15z" fill="#ff6b35"/><path d="M8 26h32v14H8z" fill="#ffffff"/><path d="M20 30h8v10h-8z" fill="#ff6b35"/></svg>
+    <span>בוט חוזים<small>Space Roofing Pros — כלי פנימי</small></span>
+  </div>
+  <div class="appbar__spacer"></div>
+  <div class="appbar__actions">
+    <button type="button" class="btn btn--ghost btn--sm" id="btnDraft">💾 טיוטה</button>
+    <button type="button" class="btn btn--ghost btn--sm" id="btnReset">🗑 חדש</button>
+    <button type="button" class="btn btn--ghost btn--sm" id="btnSettings">⚙ הגדרות</button>
+  </div>
+</div>
+
+<main class="app">
+
+  <!-- ============ Bot panel ============ -->
+  <section class="bot" aria-label="שאלון">
+    <div class="bot__head">
+      <div class="progress"><div class="progress__bar" id="bar"></div></div>
+      <div class="bot__step" id="stepLabel">שלב 1</div>
+    </div>
+
+    <div class="bot__body" id="body"></div>
+
+    <div class="bot__nav">
+      <button type="button" class="btn btn--outline btn--sm" id="btnBack">→ חזור</button>
+      <span class="spacer"></span>
+      <span class="kbd-hint">לחץ <kbd>Enter</kbd> להמשך</span>
+      <button type="button" class="btn btn--primary" id="btnNext">המשך ←</button>
+    </div>
+  </section>
+
+  <!-- ============ Live preview ============ -->
+  <section class="preview" aria-label="תצוגה מקדימה של החוזה">
+    <div class="preview__head">
+      <span class="preview__title">תצוגה מקדימה</span>
+      <span class="badge" id="cNo">—</span>
+      <span class="appbar__spacer"></span>
+      <button type="button" class="btn btn--outline btn--sm" id="btnPrint">🖨 הדפס / PDF</button>
+    </div>
+    <div class="preview__doc" id="doc"></div>
+  </section>
+
+</main>
+
+<!-- ============ Settings modal ============ -->
+<div class="modal" id="settings" hidden>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <div class="modal__head">
+      <h2 id="setTitle" style="margin:0;">הגדרות</h2>
+      <button type="button" class="modal__close" id="setClose" aria-label="סגור">✕</button>
+    </div>
+
+    <h3 style="margin-top:20px;font-size:.95rem;">שליחה אוטומטית</h3>
+    <p style="font-size:.85rem;">
+      בלי הגדרה כאן הבוט פותח לך מייל מוכן בתוכנת המייל (עובד מיד).
+      עם כתובת Worker הוא שולח את החוזה ללקוח ישירות בלחיצה אחת.
+      ההוראות ב־<code>worker/README.md</code>.
+    </p>
+    <div class="grid grid--1">
+      <div class="field">
+        <label for="setEndpoint">כתובת ה-Worker</label>
+        <input type="url" id="setEndpoint" class="ltr" placeholder="https://contracts.your-domain.workers.dev" />
+        <span class="field__hint">בלי לוכסן בסוף</span>
+      </div>
+      <div class="field">
+        <label for="setToken">טוקן מפעיל</label>
+        <input type="password" id="setToken" class="ltr" placeholder="OPERATOR_TOKEN" autocomplete="off" />
+        <span class="field__hint">נשמר רק בדפדפן הזה (localStorage), לא נכנס לקוד</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top:22px;font-size:.95rem;">פרטי החברה בחוזה</h3>
+    <div class="grid">
+      <div class="field"><label for="setName">שם מסחרי</label><input type="text" id="setName" /></div>
+      <div class="field"><label for="setLegal">שם משפטי</label><input type="text" id="setLegal" /></div>
+      <div class="field"><label for="setLicense">רישיון FL</label><input type="text" id="setLicense" class="ltr" /></div>
+      <div class="field"><label for="setPhone">טלפון</label><input type="tel" id="setPhone" class="ltr" /></div>
+      <div class="field span-2"><label for="setEmail">אימייל</label><input type="email" id="setEmail" class="ltr" /></div>
+      <div class="field span-2"><label for="setAddress">כתובת</label><input type="text" id="setAddress" class="ltr" /></div>
+      <div class="field"><label for="setCity">עיר</label><input type="text" id="setCity" class="ltr" /></div>
+      <div class="field"><label for="setZip">מיקוד</label><input type="text" id="setZip" class="ltr" /></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:22px;">
+      <button type="button" class="btn btn--primary btn--block" id="setSave">שמור</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="assets/js/contract-bot.js"></script>
+</body>
+</html>
