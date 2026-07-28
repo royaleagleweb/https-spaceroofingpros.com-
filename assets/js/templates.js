@@ -32,6 +32,6 @@ export function normalizeAny(contract) {
 }
 
 /** Build the delivery email for any contract kind. */
-export function renderEmailAny(contract, signUrl) {
-  return getTemplate(contract && contract.kind).renderEmail(contract, signUrl);
+export function renderEmailAny(contract, signUrl, opts) {
+  return getTemplate(contract && contract.kind).renderEmail(contract, signUrl, opts);
 }

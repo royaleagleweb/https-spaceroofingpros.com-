@@ -58,17 +58,23 @@ function start() {
 
 const co = contract.company || {};
 
+// A co-owner link is the same page: the payload already carries the first
+// signature, so the role follows from the contract's own state.
+const role = (contract.ownerSignature && contract.hasCoOwner === 'Yes' && !contract.coOwnerSignature)
+  ? 'coOwner' : 'owner';
+const expectedName = role === 'coOwner' ? (contract.coOwnerName || '') : (contract.clientName || '');
+
 $('brandName').firstChild.textContent = co.name || 'Your contract';
 $('brandSub').textContent = co.license ? `Licensed & Insured · FL ${co.license}` : 'Licensed & Insured';
 document.title = `Sign Contract ${contract.contractNo}${co.name ? ` — ${co.name}` : ''}`;
 
 main.innerHTML = $('tpl').innerHTML;
 $('doc').innerHTML = renderAny(contract);
-$('signer').value = contract.clientName || '';
+$('signer').value = expectedName;
 $('coName').textContent = co.name || 'us';
-$('heroTitle').textContent = contract.kind === 'roofing'
-  ? 'Your roofing agreement is ready'
-  : `Your ${(contract.projectType || 'project').toLowerCase()} agreement is ready`;
+$('heroTitle').textContent = role === 'coOwner'
+  ? 'Your co-signature is needed'
+  : (contract.kind === 'roofing' ? 'Your roofing agreement is ready' : 'Your agreement is ready');
 
 /* ---------------- Signature pad ---------------- */
 
@@ -96,7 +102,7 @@ $('submit').addEventListener('click', async () => {
 
   // No Worker behind this link — let the client return the signed copy themselves.
   if (!api) {
-    $('doc').innerHTML = renderAny(contract, { signature, signerName: signer, signedAt });
+    $('doc').innerHTML = renderAny(contract, { signature, signerName: signer, signedAt, role });
     window.print();
     window.location.href = `mailto:${encodeURIComponent(co.email || '')}`
       + `?subject=${encodeURIComponent(`Signed Contract ${contract.contractNo} — ${signer}`)}`
@@ -113,7 +119,7 @@ $('submit').addEventListener('click', async () => {
     const res = await fetch(`${api.replace(/\/$/, '')}/api/sign`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p: params.get('p'), s: sig, signature, signerName: signer, signedAt }),
+      body: JSON.stringify({ p: params.get('p'), s: sig, signature, signerName: signer, signedAt, role }),
     });
     const out = await res.json().catch(() => ({}));
     if (!res.ok || !out.ok) throw new Error(out.error || `Error ${res.status}`);
@@ -121,10 +127,12 @@ $('submit').addEventListener('click', async () => {
     main.innerHTML = `<div class="sign-card done">
       <div class="done__mark">✓</div>
       <h1 style="font-size:1.5rem;">Thank you, ${esc(signer.split(' ')[0])}!</h1>
-      <p>Contract <b>${esc(contract.contractNo)}</b> is signed. A copy is on its way to
-      <b>${esc(contract.clientEmail)}</b>.</p>
-      <p>We'll reach out shortly to confirm your start date of
-      <b>${esc(contract.startDate || 'the scheduled day')}</b>.</p>
+      <p>Agreement <b>${esc(contract.contractNo)}</b> is signed. A copy is on its way to
+      <b>${esc(role === 'coOwner' ? contract.coOwnerEmail : contract.clientEmail)}</b>.</p>
+      ${out.awaiting === 'coOwner'
+        ? `<p>We've emailed <b>${esc(contract.coOwnerName || 'the co-owner')}</b> at
+           <b>${esc(contract.coOwnerEmail)}</b> to add their signature.</p>`
+        : `<p>We'll be in touch shortly to confirm scheduling.</p>`}
       ${co.phone ? `<p style="margin-top:22px;"><a class="btn btn--navy" href="tel:${esc(co.phone.replace(/[^\d+]/g, ''))}">📞 ${esc(co.phone)}</a></p>` : ''}
     </div>`;
     window.scrollTo({ top: 0, behavior: 'smooth' });

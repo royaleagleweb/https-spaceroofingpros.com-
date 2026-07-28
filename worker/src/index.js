@@ -114,9 +114,9 @@ async function sendEmail(env, { to, subject, html, replyTo }) {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-/** Roofing contracts carry `total`, pergola contracts carry `price`. */
+/** Roofing contracts carry `total`, pergola contracts carry `contractPrice`. */
 function contractTotal(c) {
-  return Number(c.kind === 'pergola' ? c.price : c.total) || 0;
+  return Number(c.kind === 'pergola' ? c.contractPrice : c.total) || 0;
 }
 
 function validateContract(c) {
@@ -196,6 +196,13 @@ async function handleSendContract(request, env) {
   return json({ ok: true, signUrl, contractNo: contract.contractNo }, 200, env, request);
 }
 
+/** Who is signing next: the owner, or the co-owner after them. */
+function nextSigner(contract) {
+  if (!contract.ownerSignature) return 'owner';
+  if (contract.hasCoOwner === 'Yes' && contract.coOwnerEmail && !contract.coOwnerSignature) return 'coOwner';
+  return null;
+}
+
 async function handleSign(request, env) {
   const missing = requireEnv(env, ['RESEND_API_KEY', 'FROM_EMAIL', 'COMPANY_EMAIL', 'SIGNING_SECRET']);
   if (missing) return json({ ok: false, error: missing }, 500, env, request);
@@ -219,20 +226,72 @@ async function handleSign(request, env) {
     return json({ ok: false, error: 'signature image is missing or too large' }, 400, env, request);
   }
 
+  // The role comes from the payload's own state, never from the request body.
+  const role = nextSigner(contract);
+  if (!role) {
+    return json({ ok: false, error: 'this agreement is already fully signed' }, 409, env, request);
+  }
+
   const signedAt = new Date().toISOString();
   const ip = request.headers.get('CF-Connecting-IP') || '';
-  const html = renderAny(contract, { signature, signerName, signedAt, ip });
 
-  // Recipients are fixed: the company address from config, and the client
-  // address baked into the HMAC-verified payload. Nothing else is reachable.
+  if (role === 'owner') {
+    contract.ownerSignature = signature;
+    contract.ownerSignedName = signerName;
+    contract.ownerSignedAt = signedAt;
+    contract.ownerSignedIp = ip;
+  } else {
+    contract.coOwnerSignature = signature;
+    contract.coOwnerSignedName = signerName;
+    contract.coOwnerSignedAt = signedAt;
+    contract.coOwnerSignedIp = ip;
+  }
+
+  const stillPending = nextSigner(contract);
+  const html = renderAny(contract);
+
+  // A co-owner still owes a signature: pass the baton with a fresh signed link.
+  if (stillPending === 'coOwner') {
+    const payload = encodePayload(contract);
+    const mac = await sign(env.SIGNING_SECRET, payload);
+    const workerOrigin = new URL(request.url).origin;
+    const site = (env.SITE_URL || '').replace(/\/$/, '');
+    const coUrl = `${site}/contract-sign.html#p=${payload}&s=${mac}&api=${encodeURIComponent(workerOrigin)}`;
+
+    await sendEmail(env, {
+      to: contract.coOwnerEmail,
+      subject: `Your signature is needed — ${contract.contractNo}`,
+      html: renderEmailAny(contract, coUrl, {
+        greetingName: (contract.coOwnerName || '').split(' ')[0] || 'there',
+        intro: `${signerName} has signed agreement ${contract.contractNo} for the work at `
+          + `${contract.address || 'the property'}. As co-owner, your signature is needed to complete it.`,
+      }),
+      replyTo: env.COMPANY_EMAIL,
+    });
+
+    sendEmail(env, {
+      to: env.COMPANY_EMAIL,
+      subject: `Signed by ${signerName} — awaiting co-owner — ${contract.contractNo}`,
+      html: `<p>${signerName} signed. ${contract.coOwnerName || 'The co-owner'} was emailed at
+        ${contract.coOwnerEmail}.</p>${html}`,
+    }).catch(() => {});
+
+    return json({ ok: true, contractNo: contract.contractNo, signedAt, awaiting: 'coOwner' }, 200, env, request);
+  }
+
+  // Fully executed. Recipients are fixed: the office address from config, plus
+  // the party addresses baked into the HMAC-verified payload.
+  const to = [env.COMPANY_EMAIL, contract.clientEmail];
+  if (contract.hasCoOwner === 'Yes' && contract.coOwnerEmail) to.push(contract.coOwnerEmail);
+
   await sendEmail(env, {
-    to: [env.COMPANY_EMAIL, contract.clientEmail],
-    subject: `SIGNED — ${contract.contractNo} — ${signerName}`,
-    html: `<p style="font-family:Inter,sans-serif;">${signerName} signed contract
+    to,
+    subject: `SIGNED — ${contract.contractNo} — ${contract.clientName}`,
+    html: `<p style="font-family:Arial,sans-serif;">${signerName} signed agreement
       <b>${contract.contractNo}</b> on ${new Date(signedAt).toUTCString()}${ip ? ` from IP ${ip}` : ''}.</p>${html}`,
   });
 
-  return json({ ok: true, contractNo: contract.contractNo, signedAt }, 200, env, request);
+  return json({ ok: true, contractNo: contract.contractNo, signedAt, fullyExecuted: true }, 200, env, request);
 }
 
 /* ============================================================

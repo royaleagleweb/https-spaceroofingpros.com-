@@ -1,315 +1,649 @@
 /* ============================================================
    Easy Pergola — contract intake engine
    ------------------------------------------------------------
-   Flow:
-     Steps 1-9   intake
-     Step 10     the finished contract, adjustable (price, terms,
-                 scope, dates) with a live rebuild
-     Step 11     the contractor countersigns
-     Step 12     send to the client for their signature
-   The operator can email themselves a copy at any point from
-   step 10 onward.
+   The v2 intake (services -> conditional trade pages -> scope
+   table -> price -> review) is carried over as authored. What
+   follows the review step is new: the finished agreement, an
+   adjustments panel, the contractor countersignature, and
+   delivery to the client for their signature.
    ============================================================ */
 
 import {
-  PROJECT_TYPES, PERMIT_OPTIONS, renderContract, normalize, money, esc,
+  renderContract, normalize, paymentCheck as tplPaymentCheck, money as fmtMoney, esc as escape,
 } from './pergola-template.js';
 import { createSignaturePad } from './signature-pad.js';
+import { contractNumber } from './contract-template.js';
 
-const DRAFT_KEY = 'ep.contract.draft';
-const CFG_KEY = 'ep.contract.config';
 
+const form=document.getElementById('intakeForm');
+const allSteps=[...document.querySelectorAll('.step')];
+let activeSteps=[];
+let currentIndex=0;
+
+const serviceValues=()=>[...document.querySelectorAll('#serviceGrid input:checked')].map(x=>x.value);
+const hasService=v=>serviceValues().includes(v);
+
+function recalcActiveSteps(){
+  activeSteps=allSteps.filter(step=>{
+    if(!step.classList.contains('conditional')) return true;
+    const required=(step.dataset.services||'').split('|');
+    return required.some(hasService);
+  });
+  const current=activeSteps[currentIndex] || activeSteps[0];
+  renderSidebar();
+  return current;
+}
+
+function renderSidebar(){
+  const sideNav=document.getElementById('sideNav');
+  sideNav.innerHTML='';
+  activeSteps.filter(s=>s.dataset.id!=='complete').forEach((step,i)=>{
+    const item=document.createElement('div');
+    item.className='nav-item'+(i===currentIndex?' active':'')+(i<currentIndex?' done':'');
+    item.innerHTML=`<div class="dot">${i+1}</div><div>${step.dataset.title}</div>`;
+    sideNav.appendChild(item);
+  });
+}
+
+function showStep(index){
+  recalcActiveSteps();
+  currentIndex=Math.max(0,Math.min(index,activeSteps.length-1));
+  allSteps.forEach(s=>s.classList.remove('active'));
+  activeSteps[currentIndex].classList.add('active');
+  renderSidebar();
+
+  const complete=activeSteps[currentIndex].dataset.id==='complete';
+  const visibleCount=activeSteps.length-1;
+  if(!complete){
+    document.getElementById('progressText').textContent=`Step ${currentIndex+1} of ${visibleCount}`;
+    document.getElementById('progressBar').style.width=`${((currentIndex+1)/visibleCount)*100}%`;
+  }else{
+    document.getElementById('progressText').textContent='Complete';
+    document.getElementById('progressBar').style.width='100%';
+  }
+  document.getElementById('backBtn').style.visibility=currentIndex===0?'hidden':'visible';
+  document.getElementById('backBtn').style.display=complete?'none':'inline-block';
+  document.getElementById('nextBtn').style.display=complete?'none':'inline-block';
+  const stepId=activeSteps[currentIndex].dataset.id;
+  const nextBtn=document.getElementById('nextBtn');
+  nextBtn.textContent={review:'Create the agreement',contract:'Looks right — sign it',sign:'Continue'}[stepId]||'Continue';
+  nextBtn.style.display=(complete||stepId==='send')?'none':'inline-block';
+
+  if(activeSteps[currentIndex].dataset.id==='screens') buildScreenWalls();
+  if(activeSteps[currentIndex].dataset.id==='concrete') updateConcreteVisibility();
+  if(activeSteps[currentIndex].dataset.id==='kitchenBathroom') updateKitchenBathroomVisibility();
+  if(activeSteps[currentIndex].dataset.id==='scope') refreshScopeFromServices(false);
+  if(activeSteps[currentIndex].dataset.id==='review') buildSummary();
+  if(activeSteps[currentIndex].dataset.id==='contract') buildContractStep();
+  if(activeSteps[currentIndex].dataset.id==='sign') buildSignStep();
+  if(activeSteps[currentIndex].dataset.id==='send') buildSendStep();
+  saveForm();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('nextBtn').addEventListener('click',()=>{
+  const id=activeSteps[currentIndex].dataset.id;
+  if(id==='price'){
+    const msg=paymentCheck(getData());
+    const w=document.getElementById('paymentWarning');
+    w.style.display=msg?'block':'none';w.textContent=msg;
+    if(msg) return;                    // the money has to balance before moving on
+  }
+  if(id==='review'){
+    const issues=validationIssues(getData());
+    if(issues.length){ buildSummary(); return; }   // buildSummary already lists them
+    startContract();
+  }
+  if(id==='sign' && !captureSignature()) return;
+  showStep(currentIndex+1);
+});
+document.getElementById('backBtn').addEventListener('click',()=>showStep(currentIndex-1));
+
+document.querySelectorAll('#serviceGrid .check-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    setTimeout(()=>{
+      card.classList.toggle('selected',card.querySelector('input').checked);
+      recalcActiveSteps();
+      saveForm();
+    },0);
+  });
+});
+
+function setupChoiceGroup(containerId,fieldName,onChange){
+  document.querySelectorAll(`#${containerId} .choice`).forEach(c=>{
+    c.addEventListener('click',()=>{
+      document.querySelectorAll(`#${containerId} .choice`).forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected');
+      form.elements[fieldName].value=c.dataset.value;
+      if(onChange)onChange(c.dataset.value);
+      saveForm();
+    });
+  });
+}
+setupChoiceGroup('coOwnerChoice','hasCoOwner',v=>{
+  document.getElementById('coOwnerFields').classList.toggle('hidden',v!=='Yes');
+});
+setupChoiceGroup('surveyChoice','surveyResponsibility');
+
+const scopeCategories=[
+ ['Pergola structure & roof'],
+ ['Engineering / structural plans'],
+ ['Permit / expeditor / city fee'],
+ ['Concrete slab / footings'],
+ ['Paver removal / reset'],
+ ['Electrical / lights / fans'],
+ ['Regular screens'],
+ ['Motorized screens'],
+ ['Outdoor kitchen / plumbing'],
+ ['Outdoor bathroom'],
+ ['Flooring / turf / landscaping'],
+ ['Decorative wall / fence finish'],
+ ['Other']
+];
+const statusOptions=['INCLUDED','EXCLUDED','HOMEOWNER RESPONSIBILITY','CONTRACTOR RESPONSIBILITY','BY OTHERS','ALLOWANCE','NOT APPLICABLE','NOT DECIDED'];
+const scopeList=document.getElementById('scopeList');
+
+function buildScope(){
+  scopeList.innerHTML='';
+  scopeCategories.forEach((row,i)=>{
+    const div=document.createElement('div');
+    div.className='scope-row';
+    div.innerHTML=`<div class="scope-name">${row[0]}</div>
+      <select name="scopeStatus_${i}">${statusOptions.map(s=>`<option${s==='NOT DECIDED'?' selected':''}>${s}</option>`).join('')}</select>
+      <input name="scopeDetail_${i}" placeholder="Specific inclusion or limitation">`;
+    scopeList.appendChild(div);
+  });
+}
+buildScope();
+
+function refreshScopeFromServices(force=true){
+  const d=getData();
+  const mappings=[
+    ['Aluminum Pergola','Patio Cover'],
+    [],
+    [],
+    ['Concrete Slab'],
+    ['Pavers'],
+    ['Electrical'],
+    ['Regular Screens'],
+    ['Motorized Screens'],
+    ['Outdoor Kitchen'],
+    ['Outdoor Bathroom'],
+    ['Flooring / Turf / Landscaping'],
+    ['Decorative Wall / Fence'],
+    ['Other']
+  ];
+  const details=[
+    'Furnish and install the structure and roof described in the project specifications.',
+    d.engineeringResponsibility||'Confirm engineering responsibility.',
+    d.permitResponsibility||'Confirm permit responsibility.',
+    d.concreteSf?`Approximately ${d.concreteSf} sq ft; ${d.concreteType||''}; ${d.concreteThickness||''}.`:'No concrete work unless specifically listed.',
+    d.paverSf?`Approximately ${d.paverSf} sq ft; ${d.paverType||''}.`:'No paver work unless specifically listed.',
+    'Electrical work only as specifically described in the electrical section.',
+    'Regular screen openings only as listed in the screen section.',
+    'Motorized screen openings only as listed in the screen section.',
+    'Outdoor kitchen work only as specifically described.',
+    'Outdoor bathroom work only as specifically described.',
+    'Flooring, turf, or landscaping only as specifically described.',
+    'Decorative wall or fence work only as specifically described.',
+    ''
+  ];
+
+  scopeCategories.forEach((_,i)=>{
+    const status=form.querySelector(`[name="scopeStatus_${i}"]`);
+    const detail=form.querySelector(`[name="scopeDetail_${i}"]`);
+    if(!force && status.value && status.value!=='NOT DECIDED') return;
+    if(i===1){
+      status.value=d.engineeringResponsibility==='Homeowner responsibility'?'HOMEOWNER RESPONSIBILITY':
+                   d.engineeringResponsibility?.includes('Contractor')?'INCLUDED':
+                   d.engineeringResponsibility==='Not included'?'EXCLUDED':'NOT DECIDED';
+    }else if(i===2){
+      status.value=d.permitResponsibility==='Homeowner responsibility'?'HOMEOWNER RESPONSIBILITY':
+                   d.permitResponsibility==='Contractor responsibility'?'INCLUDED':'NOT DECIDED';
+    }else{
+      const selected=mappings[i].some(hasService);
+      status.value=selected?'INCLUDED':'EXCLUDED';
+    }
+    detail.value=details[i];
+  });
+}
+document.getElementById('refreshScope').addEventListener('click',()=>refreshScopeFromServices(true));
+document.getElementById('clearScope').addEventListener('click',()=>{
+  scopeCategories.forEach((_,i)=>{
+    form.querySelector(`[name="scopeStatus_${i}"]`).value='NOT DECIDED';
+    form.querySelector(`[name="scopeDetail_${i}"]`).value='';
+  });
+});
+
+function buildScreenWalls(){
+  const count=Number(document.getElementById('screenWallCount').value||1);
+  const container=document.getElementById('screenWalls');
+  const existing={};
+  container.querySelectorAll('.screen-wall').forEach((row,i)=>{
+    existing[i]={
+      label:row.querySelector('[data-f="label"]')?.value||'',
+      width:row.querySelector('[data-f="width"]')?.value||'',
+      height:row.querySelector('[data-f="height"]')?.value||'',
+      type:row.querySelector('[data-f="type"]')?.value||'',
+      jumbo:row.querySelector('[data-f="jumbo"]')?.value||''
+    };
+  });
+  container.innerHTML='';
+  for(let i=0;i<count;i++){
+    const prev=existing[i]||{};
+    const row=document.createElement('div');
+    row.className='screen-wall';
+    row.innerHTML=`
+      <div class="field"><label>Opening</label><input data-f="label" name="screen_${i}_label" value="${prev.label||`Wall ${i+1}`}"></div>
+      <div class="field"><label>Width (ft)</label><input data-f="width" name="screen_${i}_width" type="number" min="0" step=".1" value="${prev.width||''}"><div class="wall-warning">Over 16 ft — choose Jumbo or split opening.</div></div>
+      <div class="field"><label>Height (ft)</label><input data-f="height" name="screen_${i}_height" type="number" min="0" step=".1" value="${prev.height||''}"></div>
+      <div class="field"><label>Screen type</label><select data-f="type" name="screen_${i}_type">
+        <option ${prev.type==='Regular screen'?'selected':''}>Regular screen</option>
+        <option ${prev.type==='Motorized screen'?'selected':''}>Motorized screen</option>
+      </select></div>
+      <div class="field"><label>Size class</label><select data-f="jumbo" name="screen_${i}_jumbo">
+        <option ${prev.jumbo==='Standard'?'selected':''}>Standard</option>
+        <option ${prev.jumbo==='Jumbo'?'selected':''}>Jumbo</option>
+        <option ${prev.jumbo==='Split into two'?'selected':''}>Split into two</option>
+      </select></div>`;
+    container.appendChild(row);
+    const width=row.querySelector('[data-f="width"]');
+    const warning=row.querySelector('.wall-warning');
+    const jumbo=row.querySelector('[data-f="jumbo"]');
+    const check=()=>{
+      const over=Number(width.value)>16;
+      warning.style.display=over?'block':'none';
+      if(over && jumbo.value==='Standard') jumbo.value='Jumbo';
+      saveForm();
+    };
+    width.addEventListener('input',check);
+    jumbo.addEventListener('change',check);
+    check();
+  }
+  document.getElementById('motorizedOptions').classList.toggle('hidden',!hasService('Motorized Screens'));
+}
+document.getElementById('screenWallCount').addEventListener('change',buildScreenWalls);
+
+function updateConcreteVisibility(){
+  document.getElementById('concreteFields').classList.toggle('hidden',!hasService('Concrete Slab'));
+  document.getElementById('paverFields').classList.toggle('hidden',!hasService('Pavers'));
+}
+function updateKitchenBathroomVisibility(){
+  document.getElementById('kitchenFields').classList.toggle('hidden',!hasService('Outdoor Kitchen'));
+  document.getElementById('bathroomFields').classList.toggle('hidden',!hasService('Outdoor Bathroom'));
+}
+
+function getData(){
+  const fd=new FormData(form);
+  const d=Object.fromEntries(fd.entries());
+  d.services=serviceValues();
+  d.scope=scopeCategories.map((r,i)=>({
+    category:r[0],
+    status:form.querySelector(`[name="scopeStatus_${i}"]`).value,
+    detail:form.querySelector(`[name="scopeDetail_${i}"]`).value
+  }));
+  d.files=[...document.getElementById('fileInput').files].map(f=>f.name);
+  d.screens=[];
+  const count=Number(d.screenWallCount||0);
+  for(let i=0;i<count;i++){
+    const label=form.querySelector(`[name="screen_${i}_label"]`);
+    if(label){
+      d.screens.push({
+        label:label.value,
+        width:form.querySelector(`[name="screen_${i}_width"]`).value,
+        height:form.querySelector(`[name="screen_${i}_height"]`).value,
+        type:form.querySelector(`[name="screen_${i}_type"]`).value,
+        sizeClass:form.querySelector(`[name="screen_${i}_jumbo"]`).value
+      });
+    }
+  }
+  return d;
+}
+
+function money(v){
+  if(v===''||v==null)return'Not entered';
+  return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v));
+}
+function esc(s=''){
+  return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function paymentCheck(d){
+  const price=Number(d.contractPrice||0),dep=Number(d.deposit||0),bal=Number(d.balance||0);
+  if(price && dep+bal!==price)return`Deposit plus balance is ${money(dep+bal)}, not ${money(price)}.`;
+  return'';
+}
+function validationIssues(d){
+  const issues=[];
+  if(!d.clientName)issues.push('Homeowner legal name is missing.');
+  if(!d.clientEmail)issues.push('Client email is missing.');
+  if(!d.address||!d.city||!d.zip)issues.push('Project address is incomplete.');
+  if(!d.services.length)issues.push('No service is selected.');
+  if(!d.contractPrice)issues.push('Contract price is missing.');
+  if(!d.permitResponsibility)issues.push('Permit responsibility is not selected.');
+  if(!d.engineeringResponsibility)issues.push('Engineering responsibility is not selected.');
+  if(!d.hoaResponsibility)issues.push('HOA responsibility is not selected.');
+  if(d.scope.some(x=>x.status==='NOT DECIDED'))issues.push('One or more scope categories are still NOT DECIDED.');
+  if(d.hasCoOwner==='Yes'&&(!d.coOwnerName||!d.coOwnerEmail))issues.push('Co-owner information is incomplete.');
+  if((hasService('Regular Screens')||hasService('Motorized Screens'))&&d.screens.some(x=>Number(x.width)>16&&x.sizeClass==='Standard'))issues.push('A screen opening over 16 ft is still marked Standard.');
+  const p=paymentCheck(d);if(p)issues.push(p);
+  return issues;
+}
+
+function buildSummary(){
+  const d=getData();
+  const screenHtml=d.screens.length?d.screens.map(x=>`<p><b>${esc(x.label)}:</b> ${esc(x.width||'?')} ft × ${esc(x.height||'?')} ft · ${esc(x.type)} · ${esc(x.sizeClass)}</p>`).join(''):'<p>No screens selected.</p>';
+  const scopeHtml=d.scope.map(x=>`<p><b>${esc(x.category)}:</b> ${esc(x.status)}${x.detail?` — ${esc(x.detail)}`:''}</p>`).join('');
+  let serviceDetails='';
+  if(hasService('Concrete Slab'))serviceDetails+=`<p><b>Concrete:</b> ${esc(d.concreteSf||'?')} sq ft · ${esc(d.concreteThickness||'')} · ${esc(d.concreteType||'')} · Preparation: ${esc(d.fieldPreparation||'')} · Attach to existing: ${esc(d.attachExistingSlab||'')}</p>`;
+  if(hasService('Pavers'))serviceDetails+=`<p><b>Pavers:</b> ${esc(d.paverSf||'?')} sq ft · ${esc(d.paverType||'')} · ${esc(d.paverMatch||'')}</p>`;
+  if(hasService('Electrical'))serviceDetails+=`<p><b>Electrical:</b> Fans ${esc(d.electricalFans||'0')} · Lights ${esc(d.electricalLights||'0')} · ${esc(d.switchSetup||'No switch details')} · ${esc(d.electricalOutlets||'No outlet details')}</p>`;
+  if(hasService('Outdoor Kitchen'))serviceDetails+=`<p><b>Kitchen:</b> ${esc(d.kitchenLayout||'')} · Countertop: ${esc(d.countertop||'')} · Appliances: ${esc(d.appliances||'')}</p>`;
+  if(hasService('Outdoor Bathroom'))serviceDetails+=`<p><b>Bathroom:</b> ${esc(d.bathroomSize||'')} · ${esc(d.bathroomFixtures||'')} · ${esc(d.wasteConnection||'')}</p>`;
+
+  document.getElementById('summary').innerHTML=`
+    <div class="summary-section"><h3>Client</h3>
+      <p><b>${esc(d.clientName||'Not entered')}</b></p>
+      <p>${esc(d.clientPhone||'No phone')} · ${esc(d.clientEmail||'No email')}</p>
+      ${d.hasCoOwner==='Yes'?`<p>Co-owner: ${esc(d.coOwnerName||'Not entered')} · ${esc(d.coOwnerEmail||'No email')}</p>`:''}
+    </div>
+    <div class="summary-section"><h3>Property</h3>
+      <p>${esc(d.address||'Not entered')}, ${esc(d.city||'')}, ${esc(d.state||'FL')} ${esc(d.zip||'')}</p>
+      <p>Project ID: ${esc(d.projectId||'Not entered')} · Sales rep: ${esc(d.salesRep||'Not entered')}</p>
+    </div>
+    <div class="summary-section"><h3>Services</h3>
+      <p><b>${esc(d.services.join(', ')||'None selected')}</b></p>
+      <p>${esc(d.projectSummary||'No project summary')}</p>
+      ${hasService('Aluminum Pergola')||hasService('Patio Cover')?`<p>${esc(d.width||'?')} × ${esc(d.depth||'?')} · ${esc(d.attachment||'')} · ${esc(d.frameColor||'')} · ${esc(d.roofSystem||'')}</p>`:''}
+      ${serviceDetails}
+    </div>
+    <div class="summary-section"><h3>Screens</h3>${screenHtml}</div>
+    <div class="summary-section"><h3>Approvals</h3>
+      <p>Permit: ${esc(d.permitResponsibility||'Not selected')}</p>
+      <p>Engineering: ${esc(d.engineeringResponsibility||'Not selected')}</p>
+      <p>HOA: ${esc(d.hoaResponsibility||'Not selected')}</p>
+      <p>Survey/property lines: ${esc(d.surveyResponsibility||'')}</p>
+    </div>
+    <div class="summary-section"><h3>Scope Table</h3>${scopeHtml}</div>
+    <div class="summary-section"><h3>Financial</h3>
+      <p>Contract price: <b>${money(d.contractPrice)}</b></p>
+      <p>Deposit: ${money(d.deposit)} · Balance: ${money(d.balance)}</p>
+      <p>${esc(d.paymentTerms||'No payment terms')}</p>
+    </div>
+    <div class="summary-section"><h3>Schedule & Attachments</h3>
+      <p>Start: ${esc(d.estimatedStart||'Not entered')}</p>
+      <p>Completion: ${esc(d.estimatedCompletion||'Not entered')}</p>
+      <p>Attachments: ${esc(d.files.join(', ')||'None')}</p>
+      <p>Clarifications: ${esc(d.clarifications||'None')}</p>
+    </div>`;
+  const issues=validationIssues(d),warning=document.getElementById('reviewWarning');
+  warning.style.display='block';
+  if(issues.length){
+    warning.style.background='#fff3f0';warning.style.color='var(--red)';
+    warning.innerHTML=`<b>Please review:</b><br>${issues.map(x=>`• ${esc(x)}`).join('<br>')}`;
+  }else{
+    warning.style.background='#edf7f2';warning.style.color='var(--green)';
+    warning.innerHTML='Everything needed for the agreement is filled in. Continue to create it.';
+  }
+}
+
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const files=[...e.target.files].map(f=>f.name);
+  document.getElementById('fileList').textContent=files.length?files.join(', '):'No files selected.';
+});
+
+document.getElementById('downloadJson').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify(getData(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='easy-pergola-contract-intake-v2.json';a.click();URL.revokeObjectURL(a.href);
+});
+document.getElementById('printSummary').addEventListener('click',()=>window.print());
+document.getElementById('restartBtn').addEventListener('click',()=>{
+  localStorage.removeItem('easyPergolaIntakeV2');
+  localStorage.removeItem(CONTRACT_KEY);
+  location.reload();
+});
+
+function saveForm(){
+  try{
+    const d=getData();
+    localStorage.setItem('easyPergolaIntakeV2',JSON.stringify(d));
+  }catch(e){}
+}
+function restoreForm(){
+  try{
+    const raw=localStorage.getItem('easyPergolaIntakeV2');if(!raw)return;
+    const d=JSON.parse(raw);
+    Object.entries(d).forEach(([k,v])=>{
+      if(['services','scope','files','screens'].includes(k))return;
+      const el=form.elements[k];
+      if(!el)return;
+      if(el.type==='checkbox')el.checked=!!v;else el.value=v??'';
+    });
+    (d.services||[]).forEach(v=>{
+      const input=[...document.querySelectorAll('#serviceGrid input')].find(x=>x.value===v);
+      if(input){input.checked=true;input.closest('.check-card').classList.add('selected')}
+    });
+    if(d.hasCoOwner==='Yes'){
+      document.querySelectorAll('#coOwnerChoice .choice').forEach(x=>x.classList.toggle('selected',x.dataset.value==='Yes'));
+      document.getElementById('coOwnerFields').classList.remove('hidden');
+    }
+    (d.scope||[]).forEach((x,i)=>{
+      const s=form.querySelector(`[name="scopeStatus_${i}"]`),t=form.querySelector(`[name="scopeDetail_${i}"]`);
+      if(s)s.value=x.status;if(t)t.value=x.detail;
+    });
+    if(d.surveyResponsibility){
+      document.querySelectorAll('#surveyChoice .choice').forEach(x=>x.classList.toggle('selected',x.dataset.value===d.surveyResponsibility));
+    }
+    recalcActiveSteps();
+    if((d.services||[]).some(x=>['Regular Screens','Motorized Screens'].includes(x))){
+      setTimeout(()=>{
+        buildScreenWalls();
+        (d.screens||[]).forEach((x,i)=>{
+          const set=(n,v)=>{const e=form.querySelector(`[name="screen_${i}_${n}"]`);if(e)e.value=v??''};
+          set('label',x.label);set('width',x.width);set('height',x.height);set('type',x.type);set('jumbo',x.sizeClass);
+        });
+      },0);
+    }
+  }catch(e){}
+}
+
+form.addEventListener('input',saveForm);
+form.addEventListener('change',saveForm);
+
+restoreForm();
+recalcActiveSteps();
+showStep(0);
+
+/* ============================================================
+   Contract stages
+   ============================================================ */
+
+const CONTRACT_KEY = 'easyPergolaContract';
+const CFG_KEY = 'easyPergolaConfig';
 const $ = (id) => document.getElementById(id);
-const form = $('form');
-const steps = [...document.querySelectorAll('.step')];
-const INTAKE_STEPS = 10;          // steps 1-10 drive the progress bar
-const REVIEW = 9;                 // index of the "contract is ready" step
-const SIGN = 10;                  // countersign
-const SEND = 11;                  // send to client
-const DONE = 12;
-
-let current = 0;
-let pad = null;
-let busy = false;
-
-/* ---------------- Config ---------------- */
 
 const cfg = Object.assign(
   { endpoint: '', token: '', myEmail: '', company: {} },
-  readJSON(CFG_KEY)
+  (() => { try { return JSON.parse(localStorage.getItem(CFG_KEY) || 'null') || {}; } catch { return {}; } })()
 );
 
-function readJSON(key) {
-  try { return JSON.parse(localStorage.getItem(key) || 'null') || {}; }
-  catch { return {}; }
+/** The intake answers plus everything the agreement adds on top. */
+let contract = normalize(Object.assign(
+  {},
+  (() => { try { return JSON.parse(localStorage.getItem(CONTRACT_KEY) || 'null') || {}; } catch { return {}; } })()
+));
+
+let pad = null;
+let busy = false;
+
+function saveContract() {
+  try { localStorage.setItem(CONTRACT_KEY, JSON.stringify(contract)); } catch { /* quota */ }
 }
 
 function saveCfg() {
   try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch { /* quota */ }
 }
 
-/* ---------------- Data ---------------- */
-
-let data = normalize(Object.assign({ warrantyYears: 1 }, readJSON(DRAFT_KEY)));
-
-function collect() {
-  const entries = Object.fromEntries(new FormData(form).entries());
-  data = normalize(Object.assign({}, data, entries, { company: cfg.company }));
-  saveDraft();
-  return data;
+/** Fold the current intake answers into the contract, keeping signatures. */
+function syncContract() {
+  const intake = getData();
+  contract = normalize(Object.assign({}, contract, intake, {
+    company: Object.assign({}, contract.company, cfg.company),
+    contractNo: contract.contractNo || contractNumber('EP'),
+  }));
+  saveContract();
+  return contract;
 }
 
-function saveDraft() {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch { /* quota */ }
+function startContract() {
+  contract.contractNo = contract.contractNo || contractNumber('EP');
+  syncContract();
 }
 
-/** Push saved values back into the intake inputs (draft restore, review edits). */
-function hydrate() {
-  Object.entries(data).forEach(([k, v]) => {
-    const el = form.elements[k];
-    if (el && typeof v !== 'object' && v != null) el.value = v;
-  });
-  document.querySelectorAll('.choices').forEach((group) => {
-    const val = data[group.dataset.name];
-    group.querySelectorAll('.choice').forEach((ch) => {
-      ch.classList.toggle('selected', ch.dataset.value === val);
-    });
-  });
-}
+/* ---------------- Step: the finished agreement ---------------- */
 
-/* ---------------- Choice tiles ---------------- */
-
-function buildChoices(name, list) {
-  const group = document.querySelector(`.choices[data-name="${name}"]`);
-  group.innerHTML = list.map((o) =>
-    `<button type="button" class="choice" data-value="${esc(o.id)}">${esc(o.label)}`
-    + `<small>${esc(o.note)}</small></button>`).join('');
-  group.addEventListener('click', (e) => {
-    const choice = e.target.closest('.choice');
-    if (!choice) return;
-    group.querySelectorAll('.choice').forEach((c) => c.classList.remove('selected'));
-    choice.classList.add('selected');
-    form.elements[name].value = choice.dataset.value;
-    clearError();
-  });
-}
-
-buildChoices('projectType', PROJECT_TYPES);
-buildChoices('permit', PERMIT_OPTIONS);
-
-/* ---------------- Validation ---------------- */
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-const RULES = {
-  0: () => {
-    const f = form.elements;
-    if (f.clientName.value.trim().length < 2) return 'Enter the client\'s full name.';
-    if (f.clientPhone.value.replace(/\D/g, '').length < 7) return 'Enter a valid phone number.';
-    if (!EMAIL_RE.test(f.clientEmail.value.trim())) return 'Enter a valid email address.';
-    return null;
-  },
-  1: () => {
-    const f = form.elements;
-    if (!f.address.value.trim()) return 'Enter the street address.';
-    if (!f.city.value.trim()) return 'Enter the city.';
-    if (!/^\d{5}(-\d{4})?$/.test(f.zip.value.trim())) return 'Enter a 5-digit ZIP code.';
-    return null;
-  },
-  2: () => (form.elements.projectType.value ? null : 'Choose a project type.'),
-  3: () => (form.elements.projectDescription.value.trim().length > 5
-    ? null : 'Describe the project so the scope of work is clear.'),
-  4: () => (form.elements.permit.value ? null : 'Choose who handles permits.'),
-  5: () => (form.elements.included.value.trim() ? null : 'List what is included.'),
-  7: () => {
-    const price = Number(form.elements.price.value);
-    const deposit = Number(form.elements.deposit.value || 0);
-    if (!(price > 0)) return 'Enter the contract price.';
-    if (deposit > price) return 'The deposit cannot exceed the contract price.';
-    return null;
-  },
-  8: () => (form.elements.startDate.value ? null : 'Pick an estimated start date.'),
-};
-
-function showError(msg) {
-  const box = steps[current].querySelector('[data-err]');
-  if (box) box.textContent = msg;
-}
-
-function clearError() {
-  steps.forEach((s) => {
-    const box = s.querySelector('[data-err]');
-    if (box) box.textContent = '';
-  });
-}
-
-/* ---------------- Navigation ---------------- */
-
-function show(i) {
-  steps.forEach((s, x) => s.classList.toggle('active', x === i));
-  current = i;
-  clearError();
-
-  const onIntake = i < INTAKE_STEPS;
-  $('plabel').textContent = onIntake ? `${i + 1} of ${INTAKE_STEPS}`
-    : (i === DONE ? 'Complete' : i === SIGN ? 'Your signature' : 'Send');
-  $('bar').style.width = `${Math.min(100, ((i + 1) / INTAKE_STEPS) * 100)}%`;
-
-  $('back').style.visibility = (i === 0 || i === DONE) ? 'hidden' : 'visible';
-  $('next').style.display = i >= REVIEW ? 'none' : 'inline-block';
-  document.querySelector('.hint').style.display = i >= REVIEW ? 'none' : '';
-
-  if (i === REVIEW) buildReview();
-  if (i === SIGN) buildSign();
-  if (i === SEND) buildSend();
-
-  const firstInput = steps[i].querySelector('input:not([type=hidden]), textarea');
-  if (firstInput && !firstInput.value) firstInput.focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-$('next').onclick = () => {
-  const rule = RULES[current];
-  const err = rule ? rule() : null;
-  if (err) { showError(err); return; }
-  collect();
-  if (current < REVIEW) show(current + 1);
-};
-
-$('back').onclick = () => { if (current > 0) show(current - 1); };
-
-document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter' || e.target.tagName === 'TEXTAREA') return;
-  if (!$('settings').hidden) return;
-  if (current >= REVIEW) return;
-  e.preventDefault();
-  $('next').click();
-});
-
-/* ============================================================
-   Step 10 — the finished contract, adjustable
-   ============================================================ */
-
-const ADJUSTABLE = [
-  ['price', 'Contract price ($)', 'number'],
+const ADJUST_FIELDS = [
+  ['contractPrice', 'Contract price ($)', 'number'],
   ['deposit', 'Deposit ($)', 'number'],
-  ['startDate', 'Estimated start', 'date'],
-  ['durationDays', 'Working days', 'number'],
-  ['warrantyYears', 'Warranty (years)', 'number'],
-  ['manufacturerWarranty', 'Manufacturer warranty', 'text'],
+  ['balance', 'Balance ($)', 'number'],
+  ['estimatedStart', 'Estimated start', 'text'],
+  ['estimatedCompletion', 'Estimated completion', 'text'],
+  ['agreementDate', 'Agreement date', 'date'],
   ['clientName', 'Client name', 'text'],
   ['clientEmail', 'Client email', 'email'],
   ['clientPhone', 'Client phone', 'tel'],
   ['address', 'Property address', 'text'],
   ['city', 'City', 'text'],
   ['zip', 'ZIP', 'text'],
+  ['companyRep', 'Company representative', 'text'],
 ];
 
-const ADJUSTABLE_LONG = [
-  ['projectDescription', 'Project description'],
-  ['included', 'Included'],
-  ['excluded', 'Excluded'],
-  ['paymentSchedule', 'Payment milestones'],
+const ADJUST_LONG = [
+  ['projectSummary', 'Project summary'],
+  ['paymentTerms', 'Payment terms'],
+  ['clarifications', 'Additional exclusions / clarifications'],
 ];
 
-function buildReview() {
-  collect();
-  $('deliveryNote').innerHTML = cfg.endpoint && cfg.token
-    ? `Adjust anything below — the contract rebuilds as you type. When it looks right, continue to sign it.`
-    : `Adjust anything below — the contract rebuilds as you type. One-click emailing is not configured yet, so
-       sending will open a prepared email instead. Set it up under ⚙.`;
+function buildContractStep() {
+  syncContract();
 
-  const box = $('adjust');
-  box.innerHTML = `
-    <div class="adjust-grid">
-      ${ADJUSTABLE.map(([k, label, type]) => `
-        <div class="adjust-field">
-          <label for="adj_${k}">${esc(label)}</label>
+  $('adjustPanel').innerHTML = `
+    <div class="grid-3">
+      ${ADJUST_FIELDS.map(([k, label, type]) => `
+        <div class="field">
+          <label for="adj_${k}">${escape(label)}</label>
           <input id="adj_${k}" data-adj="${k}" type="${type}"
-                 value="${esc(data[k] == null ? '' : data[k])}"
+                 value="${escape(contract[k] == null ? '' : contract[k])}"
                  ${type === 'number' ? 'min="0" step="0.01"' : ''}>
         </div>`).join('')}
-      <div class="adjust-field">
-        <label for="adj_permit">Permits</label>
-        <select id="adj_permit" data-adj="permit">
-          ${PERMIT_OPTIONS.map((o) => `<option value="${esc(o.id)}"${
-            data.permit === o.id ? ' selected' : ''}>${esc(o.label)} — ${esc(o.note)}</option>`).join('')}
-        </select>
-      </div>
     </div>
-    ${ADJUSTABLE_LONG.map(([k, label]) => `
-      <div class="adjust-field" style="margin-top:12px;">
-        <label for="adj_${k}">${esc(label)}</label>
-        <textarea id="adj_${k}" data-adj="${k}" style="min-height:76px;font-size:15px;">${esc(data[k] || '')}</textarea>
-      </div>`).join('')}`;
+    ${ADJUST_LONG.map(([k, label]) => `
+      <div class="field" style="margin-top:14px">
+        <label for="adj_${k}">${escape(label)}</label>
+        <textarea id="adj_${k}" data-adj="${k}" style="min-height:80px">${escape(contract[k] || '')}</textarea>
+      </div>`).join('')}
+    <h2>Scope table</h2>
+    <div class="scope-list">
+      ${(contract.scope || []).map((s, i) => `
+        <div class="scope-row">
+          <div class="scope-name">${escape(s.category)}</div>
+          <select data-scope-status="${i}">
+            ${['INCLUDED', 'EXCLUDED', 'HOMEOWNER RESPONSIBILITY', 'CONTRACTOR RESPONSIBILITY',
+               'BY OTHERS', 'ALLOWANCE', 'NOT APPLICABLE', 'NOT DECIDED']
+              .map((o) => `<option${s.status === o ? ' selected' : ''}>${o}</option>`).join('')}
+          </select>
+          <input data-scope-detail="${i}" value="${escape(s.detail || '')}">
+        </div>`).join('')}
+    </div>`;
 
-  box.querySelectorAll('[data-adj]').forEach((el) => {
+  $('adjustPanel').querySelectorAll('[data-adj]').forEach((el) => {
     el.addEventListener('input', () => {
-      const key = el.dataset.adj;
-      data[key] = el.value;
-      const mirror = form.elements[key];
+      contract[el.dataset.adj] = el.value;
+      const mirror = form.elements[el.dataset.adj];
       if (mirror) mirror.value = el.value;
-      data = normalize(data);
-      saveDraft();
-      paint();
+      contract = normalize(contract);
+      saveContract();
+      paintContract();
     });
   });
 
-  paint();
-}
-
-function paint() {
-  $('contractBox').innerHTML = renderContract(data);
-}
-
-/* ============================================================
-   Step 11 — contractor countersignature
-   ============================================================ */
-
-function buildSign() {
-  collect();
-  $('signWho').textContent = cfg.company.legal || 'Easy Pergola LLC';
-  if (!pad) {
-    pad = createSignaturePad($('epPad'), {
-      color: '#222',
-      onChange: (ink) => { $('signNext').disabled = !ink; },
+  $('adjustPanel').querySelectorAll('[data-scope-status]').forEach((el) => {
+    el.addEventListener('change', () => {
+      contract.scope[Number(el.dataset.scopeStatus)].status = el.value;
+      const live = form.querySelector(`[name="scopeStatus_${el.dataset.scopeStatus}"]`);
+      if (live) live.value = el.value;
+      saveContract();
+      paintContract();
     });
-    $('epClear').onclick = () => pad.clear();
-  }
-  $('signNext').disabled = !pad.hasInk;
-  $('signerName').value = data.contractorName || cfg.company.legal || '';
+  });
+
+  $('adjustPanel').querySelectorAll('[data-scope-detail]').forEach((el) => {
+    el.addEventListener('input', () => {
+      contract.scope[Number(el.dataset.scopeDetail)].detail = el.value;
+      const live = form.querySelector(`[name="scopeDetail_${el.dataset.scopeDetail}"]`);
+      if (live) live.value = el.value;
+      saveContract();
+      paintContract();
+    });
+  });
+
+  paintContract();
 }
 
-$('signNext').onclick = () => {
+function paintContract() {
+  $('contractBox').innerHTML = renderContract(contract);
+  const warn = $('contractWarning');
+  const msg = tplPaymentCheck(contract);
+  warn.style.display = msg ? 'block' : 'none';
+  warn.textContent = msg;
+}
+
+/* ---------------- Step: contractor countersignature ---------------- */
+
+function buildSignStep() {
+  syncContract();
+  if (!pad) {
+    pad = createSignaturePad($('epPad'), { color: '#202020' });
+    $('epClear').addEventListener('click', () => pad.clear());
+  }
+  $('signerName').value = contract.contractorName || contract.companyRep
+    || cfg.company.legal || 'Easy Pergola LLC';
+}
+
+/** Returns false (and explains why) when the signature step is incomplete. */
+function captureSignature() {
+  const warn = $('signWarning');
   const name = $('signerName').value.trim();
-  if (name.length < 2) { $('signErr').textContent = 'Enter the name of the person signing.'; return; }
-  if (!pad || !pad.hasInk) { $('signErr').textContent = 'Draw your signature above.'; return; }
-  $('signErr').textContent = '';
-  data.contractorSignature = pad.toDataURL();
-  data.contractorName = name;
-  data.contractorSignedAt = new Date().toISOString().slice(0, 10);
-  saveDraft();
-  show(SEND);
-};
+  if (name.length < 2) {
+    warn.style.display = 'block';
+    warn.textContent = 'Enter the name of the person signing.';
+    return false;
+  }
+  if (!pad || !pad.hasInk) {
+    warn.style.display = 'block';
+    warn.textContent = 'Draw your signature above.';
+    return false;
+  }
+  warn.style.display = 'none';
+  contract.contractorSignature = pad.toDataURL();
+  contract.contractorName = name;
+  contract.contractorSignedAt = new Date().toISOString().slice(0, 10);
+  saveContract();
+  return true;
+}
 
-$('signSkip').onclick = () => {
-  delete data.contractorSignature;
-  delete data.contractorName;
-  saveDraft();
-  show(SEND);
-};
+/* ---------------- Step: send to the client ---------------- */
 
-/* ============================================================
-   Step 12 — send to the client
-   ============================================================ */
-
-function buildSend() {
-  $('sendPreview').innerHTML = renderContract(data);
-  $('sendTo').textContent = data.clientEmail;
-  $('sendSummary').textContent =
-    `${data.projectType} · ${money(data.price)} · ${data.contractorSignature ? 'signed by you' : 'not signed by you'}`;
-  $('sendClientBtn').disabled = false;
-  $('sendClientBtn').innerHTML = '📤 Send to client for signature';
+function buildSendStep() {
+  syncContract();
+  const co = contract.hasCoOwner === 'Yes' && contract.coOwnerName
+    ? ` Then ${escape(contract.coOwnerName)} signs as co-owner.` : '';
+  $('sendSummary').innerHTML = `<b>${escape(contract.clientName)}</b> &middot;
+    ${escape(contract.clientEmail)}<br>
+    ${escape((contract.services || []).join(', ') || 'No services listed')} &middot;
+    <b>${fmtMoney(contract.contractPrice)}</b> &middot;
+    ${contract.contractorSignature ? 'signed by you' : 'not signed by you'}.${co}`;
+  $('sendPreview').innerHTML = renderContract(contract);
 }
 
 /* ---------------- Delivery ---------------- */
@@ -336,93 +670,81 @@ async function withBusy(btn, label, fn) {
   try {
     await fn();
   } catch (err) {
-    alert(`That didn't go through: ${err.message}`);
     btn.disabled = false;
     btn.innerHTML = original;
+    alert(`That didn't go through: ${err.message}`);
   } finally {
     busy = false;
   }
 }
 
-/** Email the operator their own copy. */
-function sendToMe() {
-  collect();
-  const to = cfg.myEmail || cfg.company.email;
-  if (!to) { openSettings(); alert('Add the address to send your copy to, under Settings.'); return; }
+function finish(title, text, link) {
+  $('doneTitle').textContent = title;
+  $('doneText').innerHTML = escape(text)
+    + (link ? `<br><br><a href="${escape(link)}" target="_blank" rel="noopener">Open the signing link</a>` : '');
+  showStep(activeSteps.length - 1);
+}
 
+$('sendMeBtn').addEventListener('click', () => {
+  syncContract();
+  const to = cfg.myEmail || cfg.company.email;
+  if (!to) { openSettings(); return; }
   if (!configured()) {
     window.print();
     window.location.href = `mailto:${encodeURIComponent(to)}`
-      + `?subject=${encodeURIComponent(`Contract ${data.contractNo} — ${data.clientName}`)}`
-      + `&body=${encodeURIComponent(
-        `Contract ${data.contractNo}\n${data.clientName} — ${data.address}, ${data.city}\n`
-        + `${data.projectType}\nTotal: ${money(data.price)}\n\nSave the PDF and attach it.`)}`;
+      + `?subject=${encodeURIComponent(`Agreement ${contract.contractNo} — ${contract.clientName}`)}`
+      + `&body=${encodeURIComponent(`Agreement ${contract.contractNo}\n${contract.clientName} — `
+        + `${contract.address}, ${contract.city}\n${fmtMoney(contract.contractPrice)}\n\n`
+        + `Save the PDF and attach it.`)}`;
     return;
   }
-
-  withBusy($('sendMe'), 'Sending…', async () => {
-    await post('/api/send-contract', { contract: data, recipient: 'me' });
-    $('sendMe').innerHTML = '✅ Sent to you';
+  withBusy($('sendMeBtn'), 'Sending…', async () => {
+    await post('/api/send-contract', { contract, recipient: 'me' });
+    $('sendMeBtn').innerHTML = 'Sent to you';
   });
-}
+});
 
-/** Email the client, with a link to add their signature. */
-function sendToClient() {
-  collect();
+$('sendClientBtn').addEventListener('click', () => {
+  syncContract();
   if (!configured()) {
     window.print();
-    window.location.href = `mailto:${encodeURIComponent(data.clientEmail)}`
-      + `?subject=${encodeURIComponent(`Your Easy Pergola Contract — ${data.contractNo}`)}`
-      + `&body=${encodeURIComponent(
-        `Hi ${(data.clientName || '').split(' ')[0]},\n\n`
-        + `Your contract (${data.contractNo}) for the ${data.projectType} at ${data.address} is attached.\n`
-        + `Total: ${money(data.price)}\n\nPlease review, sign, and send it back.\n\n`
+    window.location.href = `mailto:${encodeURIComponent(contract.clientEmail)}`
+      + `?subject=${encodeURIComponent(`Your Easy Pergola Agreement — ${contract.contractNo}`)}`
+      + `&body=${encodeURIComponent(`Hi ${(contract.clientName || '').split(' ')[0]},\n\n`
+        + `Your agreement (${contract.contractNo}) for ${contract.address} is attached.\n`
+        + `Total: ${fmtMoney(contract.contractPrice)}\n\nPlease review, sign, and send it back.\n\n`
         + `${cfg.company.name || 'Easy Pergola'}`)}`;
     finish('Prepared for the client',
-      `Save the PDF and attach it to the email that just opened. Set up one-click sending under ⚙ to skip this step.`);
+      'Save the PDF and attach it to the email that just opened. Set up one-click sending under Company settings to skip this step.');
     return;
   }
-
   withBusy($('sendClientBtn'), 'Sending…', async () => {
-    const out = await post('/api/send-contract', { contract: data, recipient: 'client' });
-    finish('Sent to the client',
-      `${data.clientName} received contract ${data.contractNo} at ${data.clientEmail} with a link to sign it. `
-      + `The fully executed copy lands in your inbox the moment they do.`, out.signUrl);
+    const out = await post('/api/send-contract', { contract, recipient: 'client' });
+    finish('Agreement sent',
+      `${contract.clientName} received agreement ${contract.contractNo} at ${contract.clientEmail} with a link to sign it.`
+      + (contract.hasCoOwner === 'Yes' ? ` ${contract.coOwnerName || 'The co-owner'} is asked to sign right after.` : '')
+      + ' The executed copy lands in your inbox as soon as it is signed.',
+      out.signUrl);
   });
-}
+});
 
-function finish(title, text, signUrl) {
-  $('doneTitle').textContent = title;
-  $('doneText').innerHTML = esc(text)
-    + (signUrl ? `<br><br><a href="${esc(signUrl)}" target="_blank" rel="noopener">Open the signing link</a>` : '');
-  show(DONE);
-}
+$('downloadBtn').addEventListener('click', () => { syncContract(); window.print(); });
 
-$('sendMe').onclick = sendToMe;
-$('sendClientBtn').onclick = sendToClient;
-$('download').onclick = () => { collect(); window.print(); };
-$('reviewNext').onclick = () => { collect(); show(SIGN); };
-
-$('copy').onclick = async () => {
-  collect();
-  const html = renderContract(data);
+$('copyBtn').addEventListener('click', async () => {
+  syncContract();
+  const html = renderContract(contract);
   try {
     await navigator.clipboard.write([new ClipboardItem({
       'text/html': new Blob([html], { type: 'text/html' }),
       'text/plain': new Blob([$('contractBox').innerText], { type: 'text/plain' }),
     })]);
-    $('copy').textContent = '✅ Copied';
-    setTimeout(() => { $('copy').textContent = '📋 Copy for email'; }, 2500);
+    $('copyBtn').textContent = 'Copied';
+    setTimeout(() => { $('copyBtn').textContent = 'Copy for email'; }, 2500);
   } catch {
     await navigator.clipboard.writeText($('contractBox').innerText).catch(() => {});
-    $('copy').textContent = '✅ Copied as text';
+    $('copyBtn').textContent = 'Copied as text';
   }
-};
-
-$('startNew').onclick = () => {
-  localStorage.removeItem(DRAFT_KEY);
-  location.reload();
-};
+});
 
 /* ---------------- Settings ---------------- */
 
@@ -442,13 +764,12 @@ function openSettings() {
   $('settings').hidden = false;
 }
 
-$('gear').onclick = openSettings;
-$('setCancel').onclick = () => { $('settings').hidden = true; };
+$('gearBtn').addEventListener('click', openSettings);
+$('setCancel').addEventListener('click', () => { $('settings').hidden = true; });
 $('settings').addEventListener('click', (e) => {
   if (e.target === $('settings')) $('settings').hidden = true;
 });
-
-$('setSave').onclick = () => {
+$('setSave').addEventListener('click', () => {
   cfg.myEmail = $('setMyEmail').value.trim();
   cfg.endpoint = $('setEndpoint').value.trim().replace(/\/$/, '');
   cfg.token = $('setToken').value.trim();
@@ -456,24 +777,9 @@ $('setSave').onclick = () => {
   Object.entries(SET_FIELDS).forEach(([id, key]) => { cfg.company[key] = $(id).value.trim(); });
   saveCfg();
   $('settings').hidden = true;
-  data = normalize(Object.assign(data, { company: cfg.company }));
-  if (current === REVIEW) paint();
-  if (current === SEND) buildSend();
-};
-
-/* ---------------- Boot ---------------- */
-
-// A contract mailed to the operator carries a #review= link so they can pick it
-// up on any device and continue from the adjust step.
-const hash = new URLSearchParams(location.hash.slice(1));
-if (hash.get('review')) {
-  try {
-    const bin = atob(hash.get('review').replace(/-/g, '+').replace(/_/g, '/'));
-    const bytes = Uint8Array.from(bin, (ch) => ch.charCodeAt(0));
-    data = normalize(JSON.parse(new TextDecoder().decode(bytes)));
-    saveDraft();
-  } catch { /* fall through to a normal start */ }
-}
-
-hydrate();
-show(data.price > 0 && data.clientEmail ? REVIEW : 0);
+  contract = normalize(Object.assign(contract, { company: Object.assign({}, contract.company, cfg.company) }));
+  saveContract();
+  const id = activeSteps[currentIndex] && activeSteps[currentIndex].dataset.id;
+  if (id === 'contract') paintContract();
+  if (id === 'send') buildSendStep();
+});

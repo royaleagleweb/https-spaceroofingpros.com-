@@ -108,35 +108,64 @@ from another device enters it once on that device.
 # Easy Pergola Contract Bot
 
 `pergola-contract.html` is a second bot for a different brand, built on the same
-engine. It grew out of a Typeform-style intake test that stopped at a text
-summary; this version produces a real contract and carries it through signature.
+engine. It is the v2 branded intake — 15 intake screens, 12 selectable services
+that reveal only the matching trade pages, a screen-opening repeater enforcing
+the 16 ft standard-size rule, and a 13-row scope table — carried over as
+authored. What used to be a dead end (a text summary that explicitly created
+nothing) now continues into a real agreement.
 
 ## Flow
 
-1. **Intake (steps 1–9)** — client, address, project type, description, permit
-   responsibility, inclusions, exclusions, price and deposit, schedule and
-   warranty. One question per screen, same look as the original intake form.
-2. **The contract, adjustable (step 10)** — the finished contract renders in
-   full. An *Adjustments* panel lets you change the price, deposit, milestones,
-   dates, warranty, scope, exclusions, permit responsibility, or any client
-   detail, and the contract rebuilds as you type. *Email a copy to me* sends it
-   to your own inbox with a link that reopens this step on any device.
-3. **You sign (step 11)** — the contractor countersigns on a canvas pad.
-4. **Send to the client (step 12)** — the client receives the contract already
-   bearing your signature, adds theirs, and the fully executed copy returns to
-   both inboxes.
+1. **Intake** — client and co-owner, property and project tracking, services,
+   then only the trade pages the selected services require (structure, screens,
+   concrete/pavers, electrical, kitchen/bathroom, wall/fence, flooring),
+   approvals, scope table, price, schedule, review.
+2. **The agreement** — renders in full. An *Adjust* panel changes price,
+   deposit, balance, dates, client details, payment terms, clarifications, and
+   any scope row's status or detail, rebuilding the contract as you type. The
+   deposit + balance = price rule is enforced here as well as at intake.
+   *Email a copy to me* sends it to your own inbox with a link that reopens this
+   step on any device.
+3. **You sign** — the contractor countersigns on a canvas pad.
+4. **The client signs** — they receive the agreement already bearing your
+   signature. If the intake recorded a co-owner, the Worker hands the baton to
+   them automatically once the first owner signs, and only then is the contract
+   marked fully executed and mailed to all parties.
+
+## What the agreement contains
+
+Parties and property, services, per-trade specification tables for whatever was
+selected, the governing included/excluded scope table, permit / engineering /
+HOA / survey responsibility (with the homeowner-permit clause swapped in when
+that option is chosen), standard exclusions, price and payment schedule,
+schedule, change orders, site conditions, warranty, liability, three-day right
+to cancel, collection terms, and the Florida Construction Lien Law and
+Recovery Fund notices.
 
 ## Shared engine
 
 Every contract carries a `kind`. `assets/js/templates.js` maps it to a renderer,
 so `contract-sign.html` and the Worker serve both brands from one code path —
-the signing page takes its name, license, and phone from the contract itself.
+the signing page takes its name, license, and phone from the contract itself,
+and works out whether the visitor is the owner or the co-owner from the
+payload's own state rather than trusting the request.
 
 Signatures are trimmed to the ink bounding box and downscaled before encoding,
-which keeps a countersigned contract around 7 KB of signature data rather than
-tens of KB — it has to fit inside the signing link.
+keeping each one around 7 KB — they have to fit inside the signing link.
 
-> The pergola template carries the same Florida notices as the roofing one and
-> has **not** been reviewed by a lawyer. Company details ship as placeholders —
-> set the real trade name, legal name, license number, and address under ⚙
-> before sending anything to a client.
+> The template has **not** been reviewed by a lawyer. Company details ship as
+> placeholders — set the real trade name, legal name, license number, and
+> address under *Company settings* before sending anything to a client.
+
+## Known limitation: signing links are reusable
+
+The design is deliberately stateless — the agreement travels inside the link, so
+there is no database to run. The cost is that a signing link is a bearer
+capability with no server-side record of having been used. Anyone holding the
+link can submit a second signature under a different name, producing another
+executed copy. The blast radius is small (recipients are fixed to the office
+address and the party addresses inside the HMAC-verified payload, so it cannot
+be used to mail strangers), but it is real. Closing it properly needs a stored
+record of consumed links — a Cloudflare KV namespace and a check in
+`handleSign` would do it. Adding an `exp` timestamp to the payload narrows the
+window without any storage.
