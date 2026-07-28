@@ -12,8 +12,9 @@ A static, multi-page marketing site for a Los Angeles-area roofing contractor in
 - `services.html` — Detailed service rows
 - `about.html` — Story, values, credentials
 - `contact.html` — Contact info + estimate form + map
-- `contract-bot.html` — **Internal** contract bot (see below), `noindex`
-- `contract-sign.html` — Client-facing review & e-sign page, `noindex`
+- `contract-bot.html` — **Internal** roofing contract bot (see below), `noindex`
+- `pergola-contract.html` — **Internal** Easy Pergola contract bot, `noindex`
+- `contract-sign.html` — Client-facing review & e-sign page (both brands), `noindex`
 
 ## Structure
 ```
@@ -22,14 +23,20 @@ A static, multi-page marketing site for a Los Angeles-area roofing contractor in
 ├── services.html
 ├── about.html
 ├── contact.html
-├── contract-bot.html          # internal tool
-├── contract-sign.html         # client signing page
+├── contract-bot.html          # internal tool — roofing
+├── pergola-contract.html      # internal tool — Easy Pergola
+├── contract-sign.html         # client signing page (both brands)
 ├── assets
 │   ├── css/styles.css
 │   ├── css/contract-bot.css
+│   ├── css/pergola.css
 │   ├── js/main.js
-│   ├── js/contract-template.js   # contract model + renderer (shared)
+│   ├── js/templates.js           # kind -> renderer registry
+│   ├── js/contract-template.js   # roofing contract model + renderer
+│   ├── js/pergola-template.js    # pergola contract model + renderer
+│   ├── js/signature-pad.js       # shared canvas signature capture
 │   ├── js/contract-bot.js
+│   ├── js/pergola-form.js
 │   └── js/contract-sign.js
 ├── worker/                    # optional Cloudflare Worker for email delivery
 └── README.md
@@ -95,3 +102,41 @@ under **⚙ הגדרות** and stored in the browser.
 Settings and the in-progress draft live in `localStorage` on the operator's
 machine — the Worker token is never committed to the repo. Anyone using the bot
 from another device enters it once on that device.
+
+---
+
+# Easy Pergola Contract Bot
+
+`pergola-contract.html` is a second bot for a different brand, built on the same
+engine. It grew out of a Typeform-style intake test that stopped at a text
+summary; this version produces a real contract and carries it through signature.
+
+## Flow
+
+1. **Intake (steps 1–9)** — client, address, project type, description, permit
+   responsibility, inclusions, exclusions, price and deposit, schedule and
+   warranty. One question per screen, same look as the original intake form.
+2. **The contract, adjustable (step 10)** — the finished contract renders in
+   full. An *Adjustments* panel lets you change the price, deposit, milestones,
+   dates, warranty, scope, exclusions, permit responsibility, or any client
+   detail, and the contract rebuilds as you type. *Email a copy to me* sends it
+   to your own inbox with a link that reopens this step on any device.
+3. **You sign (step 11)** — the contractor countersigns on a canvas pad.
+4. **Send to the client (step 12)** — the client receives the contract already
+   bearing your signature, adds theirs, and the fully executed copy returns to
+   both inboxes.
+
+## Shared engine
+
+Every contract carries a `kind`. `assets/js/templates.js` maps it to a renderer,
+so `contract-sign.html` and the Worker serve both brands from one code path —
+the signing page takes its name, license, and phone from the contract itself.
+
+Signatures are trimmed to the ink bounding box and downscaled before encoding,
+which keeps a countersigned contract around 7 KB of signature data rather than
+tens of KB — it has to fit inside the signing link.
+
+> The pergola template carries the same Florida notices as the roofing one and
+> has **not** been reviewed by a lawyer. Company details ship as placeholders —
+> set the real trade name, legal name, license number, and address under ⚙
+> before sending anything to a client.

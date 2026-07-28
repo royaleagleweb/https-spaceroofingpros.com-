@@ -18,7 +18,8 @@
    so no database is required.
    ============================================================ */
 
-import { renderContract, renderEmail, normalize, money } from '../../assets/js/contract-template.js';
+import { renderAny, renderEmailAny, normalizeAny } from '../../assets/js/templates.js';
+import { money } from '../../assets/js/contract-template.js';
 
 /* ---------------- encoding helpers ---------------- */
 
@@ -113,13 +114,19 @@ async function sendEmail(env, { to, subject, html, replyTo }) {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+/** Roofing contracts carry `total`, pergola contracts carry `price`. */
+function contractTotal(c) {
+  return Number(c.kind === 'pergola' ? c.price : c.total) || 0;
+}
+
 function validateContract(c) {
   if (!c || typeof c !== 'object') return 'contract payload missing';
   if (!c.clientName || String(c.clientName).trim().length < 2) return 'client name missing';
   if (!EMAIL_RE.test(String(c.clientEmail || '').trim())) return 'client email is not valid';
   if (!c.address) return 'property address missing';
-  if (!(Number(c.total) > 0)) return 'contract total must be greater than zero';
-  if (JSON.stringify(c).length > 60000) return 'contract payload is too large';
+  if (!(contractTotal(c) > 0)) return 'contract total must be greater than zero';
+  // Signatures ride inside the payload, so allow room for two of them.
+  if (JSON.stringify(c).length > 200000) return 'contract payload is too large';
   return null;
 }
 
@@ -143,29 +150,47 @@ async function handleSendContract(request, env) {
   if (missing) return json({ ok: false, error: missing }, 500, env, request);
 
   const body = await request.json().catch(() => null);
-  const contract = normalize((body && body.contract) || {});
+  const contract = normalizeAny((body && body.contract) || {});
   const bad = validateContract(contract);
   if (bad) return json({ ok: false, error: bad }, 400, env, request);
 
   const payload = encodePayload(contract);
   const mac = await sign(env.SIGNING_SECRET, payload);
   const workerOrigin = new URL(request.url).origin;
-  const signUrl = `${env.SITE_URL.replace(/\/$/, '')}/contract-sign.html`
+  const site = env.SITE_URL.replace(/\/$/, '');
+  const signUrl = `${site}/contract-sign.html`
     + `#p=${payload}&s=${mac}&api=${encodeURIComponent(workerOrigin)}`;
+  const total = money(contractTotal(contract));
+
+  // The operator's own copy: the finished contract plus a link that reopens the
+  // adjust-and-countersign step on any device.
+  if ((body && body.recipient) === 'me') {
+    const reviewPage = contract.kind === 'pergola' ? 'pergola-contract.html' : 'contract-bot.html';
+    const reviewUrl = `${site}/${reviewPage}#review=${payload}`;
+    await sendEmail(env, {
+      to: env.COMPANY_EMAIL,
+      subject: `Contract draft — ${contract.clientName} — ${total} (${contract.contractNo})`,
+      html: `<p style="font-family:Arial,sans-serif;">Draft contract for <b>${contract.clientName}</b>
+        (${contract.clientEmail}).</p>
+        <p style="font-family:Arial,sans-serif;"><a href="${reviewUrl}">Open it to adjust, sign, and send</a></p>
+        ${renderAny(contract)}`,
+    });
+    return json({ ok: true, reviewUrl, contractNo: contract.contractNo }, 200, env, request);
+  }
 
   await sendEmail(env, {
     to: contract.clientEmail,
-    subject: `Your Roofing Agreement — ${contract.contractNo}`,
-    html: renderEmail(contract, signUrl),
+    subject: `Your Contract — ${contract.contractNo}`,
+    html: renderEmailAny(contract, signUrl),
     replyTo: env.COMPANY_EMAIL,
   });
 
   // Keep the office in the loop without blocking the operator's response.
-  const officeCopy = sendEmail(env, {
+  sendEmail(env, {
     to: env.COMPANY_EMAIL,
-    subject: `Contract sent — ${contract.clientName} — ${money(contract.total)} (${contract.contractNo})`,
+    subject: `Contract sent — ${contract.clientName} — ${total} (${contract.contractNo})`,
     html: `<p>Contract <b>${contract.contractNo}</b> was sent to ${contract.clientEmail}.</p>
-      <p><a href="${signUrl}">Signing link</a></p>${renderContract(contract)}`,
+      <p><a href="${signUrl}">Signing link</a></p>${renderAny(contract)}`,
   }).catch(() => {});
 
   return json({ ok: true, signUrl, contractNo: contract.contractNo }, 200, env, request);
@@ -184,7 +209,7 @@ async function handleSign(request, env) {
   }
 
   let contract;
-  try { contract = normalize(decodePayload(body.p)); }
+  try { contract = normalizeAny(decodePayload(body.p)); }
   catch { return json({ ok: false, error: 'this signing link is corrupted' }, 400, env, request); }
 
   const signerName = String(body.signerName || '').trim();
@@ -196,7 +221,7 @@ async function handleSign(request, env) {
 
   const signedAt = new Date().toISOString();
   const ip = request.headers.get('CF-Connecting-IP') || '';
-  const html = renderContract(contract, { signature, signerName, signedAt, ip });
+  const html = renderAny(contract, { signature, signerName, signedAt, ip });
 
   // Recipients are fixed: the company address from config, and the client
   // address baked into the HMAC-verified payload. Nothing else is reachable.

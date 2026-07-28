@@ -15,8 +15,7 @@
 
 <div class="appbar">
   <div class="appbar__brand">
-    <svg viewBox="0 0 48 48" width="30" height="30" aria-hidden="true"><path d="M4 26 24 8l20 18-3 3-17-15-17 15z" fill="#ff6b35"/><path d="M8 26h32v14H8z" fill="#ffffff"/><path d="M20 30h8v10h-8z" fill="#ff6b35"/></svg>
-    <span>Space Roofing Pros<small>Licensed &amp; Insured · FL CCC1331234</small></span>
+    <span id="brandName">Contract<small id="brandSub">Licensed &amp; Insured</small></span>
   </div>
 </div>
 
@@ -28,7 +27,7 @@
 
 <template id="tpl">
   <div class="sign-hero">
-    <h1>Your roofing agreement is ready</h1>
+    <h1 id="heroTitle">Your agreement is ready</h1>
     <p>Please read the agreement below, then sign at the bottom. It takes about a minute.</p>
   </div>
 
@@ -62,7 +61,7 @@
     <span class="field__err" id="e_form" style="display:block;margin-bottom:8px;"></span>
     <button type="button" class="btn btn--primary btn--block" id="submit">Sign &amp; Return Contract</button>
     <p class="field__hint" style="margin-top:12px;text-align:center;">
-      A signed copy is emailed to you and to Space Roofing Pros immediately.
+      A signed copy is emailed to you and to <span id="coName">us</span> immediately.
     </p>
   </div>
 </template>

@@ -7,7 +7,9 @@
    Link shape: contract-sign.html#p=<payload>&s=<hmac>&api=<origin>
    ============================================================ */
 
-import { renderContract, normalize, money, esc } from './contract-template.js';
+import { renderAny, normalizeAny } from './templates.js';
+import { esc } from './contract-template.js';
+import { createSignaturePad } from './signature-pad.js';
 
 const $ = (id) => document.getElementById(id);
 const main = $('main');
@@ -32,8 +34,7 @@ function toast(msg, kind) {
 function fail(msg) {
   main.innerHTML = `<div class="sign-card"><h2 style="margin-top:0;">This link isn't valid</h2>
     <p>${esc(msg)}</p>
-    <p>Please contact us at <a href="tel:+13055551234">(305) 555-1234</a> or
-    <a href="mailto:info@spaceroofingpros.com">info@spaceroofingpros.com</a> and we'll send a fresh link.</p></div>`;
+    <p>Please reply to the email that brought you here and we'll send a fresh link.</p></div>`;
 }
 
 /* ---------------- Boot ---------------- */
@@ -46,7 +47,7 @@ let contract = null;
 try {
   const raw = params.get('p');
   if (!raw) throw new Error('missing payload');
-  contract = normalize(decodePayload(raw));
+  contract = normalizeAny(decodePayload(raw));
 } catch {
   fail('The contract link looks incomplete or was cut off by your email app. Copy the full link and try again.');
 }
@@ -55,69 +56,24 @@ if (contract) start();
 
 function start() {
 
+const co = contract.company || {};
+
+$('brandName').firstChild.textContent = co.name || 'Your contract';
+$('brandSub').textContent = co.license ? `Licensed & Insured · FL ${co.license}` : 'Licensed & Insured';
+document.title = `Sign Contract ${contract.contractNo}${co.name ? ` — ${co.name}` : ''}`;
+
 main.innerHTML = $('tpl').innerHTML;
-$('doc').innerHTML = renderContract(contract);
+$('doc').innerHTML = renderAny(contract);
 $('signer').value = contract.clientName || '';
-document.title = `Sign Contract ${contract.contractNo} — Space Roofing Pros`;
+$('coName').textContent = co.name || 'us';
+$('heroTitle').textContent = contract.kind === 'roofing'
+  ? 'Your roofing agreement is ready'
+  : `Your ${(contract.projectType || 'project').toLowerCase()} agreement is ready`;
 
 /* ---------------- Signature pad ---------------- */
 
-const pad = $('pad');
-const ctx = pad.getContext('2d');
-let drawing = false;
-let hasInk = false;
-
-function sizePad() {
-  const dpr = window.devicePixelRatio || 1;
-  const rect = pad.getBoundingClientRect();
-  const prev = hasInk ? pad.toDataURL() : null;
-  pad.width = Math.round(rect.width * dpr);
-  pad.height = Math.round(rect.height * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.lineWidth = 2.2;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.strokeStyle = '#112233';
-  if (prev) {
-    const img = new Image();
-    img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
-    img.src = prev;
-  }
-}
-
-function pos(e) {
-  const r = pad.getBoundingClientRect();
-  return { x: e.clientX - r.left, y: e.clientY - r.top };
-}
-
-pad.addEventListener('pointerdown', (e) => {
-  drawing = true;
-  pad.setPointerCapture(e.pointerId);
-  const p = pos(e);
-  ctx.beginPath();
-  ctx.moveTo(p.x, p.y);
-});
-
-pad.addEventListener('pointermove', (e) => {
-  if (!drawing) return;
-  const p = pos(e);
-  ctx.lineTo(p.x, p.y);
-  ctx.stroke();
-  if (!hasInk) { hasInk = true; pad.classList.add('is-drawn'); }
-});
-
-['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => {
-  pad.addEventListener(ev, () => { drawing = false; });
-});
-
-$('clear').addEventListener('click', () => {
-  ctx.clearRect(0, 0, pad.width, pad.height);
-  hasInk = false;
-  pad.classList.remove('is-drawn');
-});
-
-sizePad();
-window.addEventListener('resize', sizePad);
+const pad = createSignaturePad($('pad'), { color: '#112233' });
+$('clear').addEventListener('click', () => pad.clear());
 
 /* ---------------- Submit ---------------- */
 
@@ -131,18 +87,18 @@ $('submit').addEventListener('click', async () => {
   $('e_form').textContent = '';
 
   if (signer.length < 3) { $('e_signer').textContent = 'Please enter your full legal name.'; $('signer').focus(); return; }
-  if (!hasInk) { $('e_form').textContent = 'Please draw your signature above.'; return; }
+  if (!pad.hasInk) { $('e_form').textContent = 'Please draw your signature above.'; return; }
   if (!$('agree').checked) { $('e_form').textContent = 'Please check the box to confirm you agree.'; return; }
 
-  const signature = pad.toDataURL('image/png');
+  const signature = pad.toDataURL();
   const signedAt = new Date().toISOString();
   const btn = $('submit');
 
   // No Worker behind this link — let the client return the signed copy themselves.
   if (!api) {
-    $('doc').innerHTML = renderContract(contract, { signature, signerName: signer, signedAt });
+    $('doc').innerHTML = renderAny(contract, { signature, signerName: signer, signedAt });
     window.print();
-    window.location.href = `mailto:${encodeURIComponent(contract.company.email)}`
+    window.location.href = `mailto:${encodeURIComponent(co.email || '')}`
       + `?subject=${encodeURIComponent(`Signed Contract ${contract.contractNo} — ${signer}`)}`
       + `&body=${encodeURIComponent(`Attached is my signed contract ${contract.contractNo}.\n\n${signer}`)}`;
     toast('Save the PDF and attach it to the email that just opened.');
@@ -169,7 +125,7 @@ $('submit').addEventListener('click', async () => {
       <b>${esc(contract.clientEmail)}</b>.</p>
       <p>We'll reach out shortly to confirm your start date of
       <b>${esc(contract.startDate || 'the scheduled day')}</b>.</p>
-      <p style="margin-top:22px;"><a class="btn btn--navy" href="tel:+13055551234">📞 (305) 555-1234</a></p>
+      ${co.phone ? `<p style="margin-top:22px;"><a class="btn btn--navy" href="tel:${esc(co.phone.replace(/[^\d+]/g, ''))}">📞 ${esc(co.phone)}</a></p>` : ''}
     </div>`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {

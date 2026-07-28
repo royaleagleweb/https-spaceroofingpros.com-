@@ -106,7 +106,7 @@ export function labelOf(list, id, fallback) {
   return hit ? hit.label : (fallback || id || '—');
 }
 
-export function contractNumber(date) {
+export function contractNumber(prefix, date) {
   const d = date || new Date();
   const stamp = [
     d.getFullYear(),
@@ -114,7 +114,7 @@ export function contractNumber(date) {
     String(d.getDate()).padStart(2, '0'),
   ].join('');
   const rand = Math.floor(1000 + Math.random() * 9000);
-  return `SRP-${stamp}-${rand}`;
+  return `${prefix || 'SRP'}-${stamp}-${rand}`;
 }
 
 /** Build the payment milestone rows for a contract. */
@@ -136,8 +136,9 @@ export function paymentRows(data) {
 /** Normalize / fill in a raw wizard payload. Safe to call repeatedly. */
 export function normalize(raw) {
   const d = Object.assign({}, raw);
+  d.kind = 'roofing';
   d.company = Object.assign({}, COMPANY, raw.company || {});
-  d.contractNo = d.contractNo || contractNumber();
+  d.contractNo = d.contractNo || contractNumber('SRP');
   d.issuedAt = d.issuedAt || new Date().toISOString().slice(0, 10);
   d.total = Number(d.total || 0);
   d.deductible = Number(d.deductible || 0);
@@ -299,6 +300,16 @@ export function renderContract(raw, opt) {
     : `<div style="height:70px;"></div><div style="border-top:1px solid #112233;padding-top:5px;">`
       + `${esc(d.clientName || 'Owner')}</div><div style="${S.small}">Date: ____________________</div>`;
 
+  // The contractor countersigns before the contract goes out, so the signature
+  // rides along inside the payload rather than being applied at render time.
+  const contractorBlock = d.contractorSignature
+    ? `<img src="${esc(d.contractorSignature)}" alt="Contractor signature" style="max-height:70px;display:block;margin-bottom:4px;">`
+      + `<div style="border-top:1px solid #112233;padding-top:5px;">${esc(d.contractorName || c.legal)} · Lic. #${esc(c.license)}</div>`
+      + `<div style="${S.small}">Signed electronically ${esc(longDate(d.contractorSignedAt || d.issuedAt))}</div>`
+    : `<div style="height:70px;padding-top:26px;font-family:Georgia,serif;font-size:22px;color:#0b3a5c;">${esc(c.name)}</div>`
+      + `<div style="border-top:1px solid #112233;padding-top:5px;">${esc(c.legal)} · Lic. #${esc(c.license)}</div>`
+      + `<div style="${S.small}">Date: ${esc(longDate(d.issuedAt))}</div>`;
+
   return `<div style="${S.page}">
   <table style="width:100%;border-collapse:collapse;margin-bottom:18px;">
     <tr>
@@ -371,9 +382,7 @@ export function renderContract(raw, opt) {
       </td>
       <td style="width:50%;vertical-align:bottom;">
         <div style="${S.small}margin-bottom:6px;font-weight:700;color:#0b3a5c;">CONTRACTOR</div>
-        <div style="height:70px;padding-top:26px;font-family:Georgia,serif;font-size:22px;color:#0b3a5c;">${esc(c.name)}</div>
-        <div style="border-top:1px solid #112233;padding-top:5px;">${esc(c.legal)} · Lic. #${esc(c.license)}</div>
-        <div style="${S.small}">Date: ${esc(longDate(d.issuedAt))}</div>
+        ${contractorBlock}
       </td>
     </tr>
   </table>

@@ -55,7 +55,7 @@ curl https://srp-contracts.<שם-החשבון>.workers.dev/api/health
 
 ## 3. חיבור הבוט
 
-פתח את `contract-bot.html` → **⚙ הגדרות**:
+פתח את `contract-bot.html` (גגות) או `pergola-contract.html` (פרגולות) → **⚙**:
 
 | שדה | ערך |
 | --- | --- |
@@ -81,6 +81,10 @@ Worker ──> Resend ──> מייל ללקוח עם כפתור "Review & Sign
    │                              ▼
    └────────────────  POST /api/sign  ──> מייל חתום ללקוח ולמשרד
 ```
+
+ה-Worker משרת את שני סוגי החוזים. כל חוזה נושא שדה `kind`, ו-`assets/js/templates.js`
+ממפה אותו לרנדרר המתאים. `recipient: 'me'` שולח לך טיוטה עם קישור שפותח מחדש את שלב
+העריכה והחתימה; `recipient: 'client'` שולח ללקוח עם קישור חתימה.
 
 **החוזה נוסע בתוך הקישור.** אין דאטהבייס ואין מה לתחזק. הקישור חתום ב־HMAC-SHA256
 עם `SIGNING_SECRET`, ולכן אי אפשר לזייף חוזה או לשנות מחיר בקישור — ה-Worker
