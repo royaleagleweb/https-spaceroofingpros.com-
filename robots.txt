@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /contract-bot.html
+Disallow: /contract-sign.html
+Disallow: /pergola-contract.html
+Sitemap: /sitemap.xml

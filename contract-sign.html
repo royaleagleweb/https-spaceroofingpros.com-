@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Review &amp; Sign Your Contract — Space Roofing Pros</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/contract-bot.css" />
+<style>body { font-family: 'Inter', system-ui, sans-serif; }</style>
+</head>
+<body>
+
+<div class="appbar">
+  <div class="appbar__brand">
+    <span id="brandName">Contract<small id="brandSub">Licensed &amp; Insured</small></span>
+  </div>
+</div>
+
+<main class="sign-wrap" id="main">
+  <div class="sign-card" id="loading">
+    <p style="margin:0;">Loading your contract…</p>
+  </div>
+</main>
+
+<template id="tpl">
+  <div class="sign-hero">
+    <h1 id="heroTitle">Your agreement is ready</h1>
+    <p>Please read the agreement below, then sign at the bottom. It takes about a minute.</p>
+  </div>
+
+  <div class="sign-doc" id="doc"></div>
+
+  <div class="sign-card">
+    <h2 style="margin-top:0;font-size:1.15rem;">Sign here</h2>
+    <p style="font-size:.9rem;">Draw your signature with your finger or mouse.</p>
+
+    <div class="field" style="margin-bottom:14px;">
+      <label for="signer">Full legal name <span class="req">●</span></label>
+      <input type="text" id="signer" placeholder="John Smith" autocomplete="name" />
+      <span class="field__err" id="e_signer"></span>
+    </div>
+
+    <div class="pad-wrap">
+      <canvas class="pad" id="pad"></canvas>
+      <div class="pad-hint">✍ Sign here</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+      <button type="button" class="btn btn--outline btn--sm" id="clear">Clear</button>
+    </div>
+
+    <label class="agree">
+      <input type="checkbox" id="agree" />
+      <span>I have read and agree to this Agreement, including the Notice of Construction Lien Law, the
+      Recovery Fund notice, and the three-day right to cancel. I intend my electronic signature to be
+      legally binding.</span>
+    </label>
+
+    <span class="field__err" id="e_form" style="display:block;margin-bottom:8px;"></span>
+    <button type="button" class="btn btn--primary btn--block" id="submit">Sign &amp; Return Contract</button>
+    <p class="field__hint" style="margin-top:12px;text-align:center;">
+      A signed copy is emailed to you and to <span id="coName">us</span> immediately.
+    </p>
+  </div>
+</template>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="assets/js/contract-sign.js"></script>
+</body>
+</html>

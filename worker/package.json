@@ -1,0 +1,15 @@
+{
+  "name": "srp-contracts-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Contract delivery + e-signature endpoint for the Space Roofing Pros contract bot",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}

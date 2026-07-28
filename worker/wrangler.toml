@@ -1,0 +1,12 @@
+name = "srp-contracts"
+main = "src/index.js"
+compatibility_date = "2024-11-06"
+
+# Public vars — safe to keep in the repo.
+# Secrets (RESEND_API_KEY, OPERATOR_TOKEN, SIGNING_SECRET) are set with
+# `wrangler secret put` and never live in this file. See README.md.
+[vars]
+SITE_URL = "https://spaceroofingpros.com"
+FROM_EMAIL = "Space Roofing Pros <contracts@spaceroofingpros.com>"
+COMPANY_EMAIL = "info@spaceroofingpros.com"
+ALLOWED_ORIGIN = "https://spaceroofingpros.com"

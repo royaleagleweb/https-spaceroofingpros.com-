@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Easy Pergola — Contract Intake</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="stylesheet" href="assets/css/pergola.css" />
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand brand-logo-wrap">
+      <img src="assets/img/easy-pergola-logo.png" alt="Easy Pergola — Backyard Specialists" class="brand-logo">
+    </div>
+    <div class="side-note">
+      Service-specific pages only appear when that service is selected, so the form stays short but still captures every detail the agreement needs.
+    </div>
+    <div class="steps-nav" id="sideNav"></div>
+    <div class="sidebar-footer"><button type="button" class="mini-btn" id="gearBtn">Company settings</button><br><br>Answers are saved in this browser.</div>
+  </aside>
+
+  <main class="main">
+    <div class="shell">
+      <div class="topbar">
+        <div class="topbar-brand">
+          <img src="assets/img/easy-pergola-logo.png" alt="Easy Pergola — Backyard Specialists" class="topbar-logo">
+          <div class="topbar-copy">
+            <div class="top-title">New Project Agreement</div>
+            <div class="top-help">Intake &rarr; contract &rarr; your signature &rarr; client signature.</div>
+          </div>
+        </div>
+        <div class="progress-area">
+          <div class="progress-text" id="progressText"></div>
+          <div class="bar"><div id="progressBar"></div></div>
+        </div>
+      </div>
+
+      <form id="intakeForm">
+        <div class="step-wrap">
+
+          <section class="step" data-id="client" data-title="Client">
+            <div class="eyebrow">Client</div>
+            <h1>Who is the agreement for?</h1>
+            <p class="lead">Use the homeowner’s legal name when possible.</p>
+            <div class="grid-2">
+              <div class="field"><label>Homeowner full legal name</label><input name="clientName" placeholder="Example: Bridgette M. Simpo"></div>
+              <div class="field"><label>Phone number</label><input name="clientPhone" placeholder="954-000-0000"></div>
+              <div class="field"><label>Email address</label><input name="clientEmail" type="email" placeholder="client@email.com"></div>
+              <div class="field"><label>Homeowner confirmed?</label>
+                <select name="ownerConfirmed"><option>Yes</option><option>Not verified yet</option><option>No</option></select>
+              </div>
+            </div>
+            <div class="choice-grid" id="coOwnerChoice" style="margin-top:18px">
+              <div class="choice selected" data-value="No"><div class="choice-title">One homeowner</div><small>Only one owner will sign.</small></div>
+              <div class="choice" data-value="Yes"><div class="choice-title">Add a co-owner</div><small>A second owner also needs to sign.</small></div>
+            </div>
+            <input type="hidden" name="hasCoOwner" value="No">
+            <div id="coOwnerFields" class="grid-2 hidden" style="margin-top:14px">
+              <div class="field"><label>Co-owner legal name</label><input name="coOwnerName" placeholder="Second homeowner"></div>
+              <div class="field"><label>Co-owner email</label><input name="coOwnerEmail" type="email" placeholder="coowner@email.com"></div>
+            </div>
+          </section>
+
+          <section class="step" data-id="property" data-title="Property">
+            <div class="eyebrow">Property</div>
+            <h1>Where is the project?</h1>
+            <p class="lead">This address will appear throughout the agreement and Florida notices.</p>
+            <div class="field"><label>Project street address</label><input name="address" placeholder="123 Main Street"></div>
+            <div class="grid-3" style="margin-top:14px">
+              <div class="field"><label>City</label><input name="city" placeholder="Hollywood"></div>
+              <div class="field"><label>State</label><input name="state" value="FL"></div>
+              <div class="field"><label>ZIP code</label><input name="zip" placeholder="33000"></div>
+            </div>
+            <h2>Project tracking</h2>
+            <div class="grid-3">
+              <div class="field"><label>Project ID <span class="hint">(optional)</span></label><input name="projectId" placeholder="EE-2026-00123"></div>
+              <div class="field"><label>Agreement date</label><input name="agreementDate" type="date"></div>
+              <div class="field"><label>Sales representative</label><input name="salesRep" placeholder="Name"></div>
+            </div>
+          </section>
+
+          <section class="step" data-id="services" data-title="Services">
+            <div class="eyebrow">Services</div>
+            <h1>What services are included?</h1>
+            <p class="lead">Select every service in this project. Only the matching detail pages will be shown.</p>
+            <div class="check-grid" id="serviceGrid">
+              <label class="check-card"><input type="checkbox" value="Aluminum Pergola"><b>Aluminum Pergola</b><span>Attached or freestanding</span></label>
+              <label class="check-card"><input type="checkbox" value="Patio Cover"><b>Patio Cover</b><span>Insulated roof system</span></label>
+              <label class="check-card"><input type="checkbox" value="Regular Screens"><b>Regular Screens</b><span>Standard manual screen openings</span></label>
+              <label class="check-card"><input type="checkbox" value="Motorized Screens"><b>Motorized Screens</b><span>Powered retractable screens</span></label>
+              <label class="check-card"><input type="checkbox" value="Concrete Slab"><b>Concrete Slab</b><span>New slab or slab extension</span></label>
+              <label class="check-card"><input type="checkbox" value="Pavers"><b>Pavers</b><span>Removal, reset, or new pavers</span></label>
+              <label class="check-card"><input type="checkbox" value="Electrical"><b>Electrical</b><span>Fans, lights, switches, outlets</span></label>
+              <label class="check-card"><input type="checkbox" value="Outdoor Kitchen"><b>Outdoor Kitchen</b><span>Cabinets, countertop, appliances</span></label>
+              <label class="check-card"><input type="checkbox" value="Outdoor Bathroom"><b>Outdoor Bathroom</b><span>Toilet, sink, plumbing</span></label>
+              <label class="check-card"><input type="checkbox" value="Decorative Wall / Fence"><b>Wall / Fence</b><span>Privacy, finish, storage enclosure</span></label>
+              <label class="check-card"><input type="checkbox" value="Flooring / Turf / Landscaping"><b>Flooring / Turf</b><span>Finish work around the project</span></label>
+              <label class="check-card"><input type="checkbox" value="Other"><b>Other</b><span>Any additional improvement</span></label>
+            </div>
+            <div class="field" style="margin-top:16px">
+              <label>One-sentence project summary</label>
+              <textarea name="projectSummary" placeholder="Example: Furnish and install a 20x24 attached bronze aluminum pergola with white insulated roof panels, 2 fans, 8 recessed lights, and regular screens on two walls."></textarea>
+            </div>
+          </section>
+
+          <section class="step conditional" data-id="pergola" data-title="Pergola" data-services="Aluminum Pergola|Patio Cover">
+            <div class="eyebrow">Pergola / Patio Cover</div>
+            <h1>Main structure details</h1>
+            <p class="lead">Keep the common Easy Pergola selections and change only what is different.</p>
+            <div class="grid-3">
+              <div class="field"><label>Width</label><input name="width" placeholder="20 ft"></div>
+              <div class="field"><label>Depth</label><input name="depth" placeholder="24 ft"></div>
+              <div class="field"><label>Overall height</label><input name="height" value="8 ft"></div>
+            </div>
+            <div class="grid-2" style="margin-top:14px">
+              <div class="field"><label>Attachment type</label>
+                <select name="attachment"><option>Attached to house</option><option>Freestanding</option><option>Partially attached</option><option>Attached on two sides</option><option>Custom / Not decided</option></select>
+              </div>
+              <div class="field"><label>Frame / color</label>
+                <select name="frameColor"><option>Powder-coated aluminum — Bronze</option><option>Powder-coated aluminum — White</option><option>Custom color</option></select>
+              </div>
+              <div class="field"><label>Roof system</label>
+                <select name="roofSystem"><option>Insulated aluminum panels</option><option>Wood-look insulated panels</option><option>Louvered roof</option><option>Custom / Not decided</option></select>
+              </div>
+              <div class="field"><label>Ceiling finish</label>
+                <select name="ceilingFinish"><option>White</option><option>Wood-look</option><option>Bronze</option><option>Custom / Not decided</option></select>
+              </div>
+              <div class="field"><label>Gutter system</label>
+                <select name="gutter"><option>Built-in gutter and drainage</option><option>Gutter with downspout</option><option>Drainage through posts</option><option>No gutter included</option><option>As shown in approved design</option></select>
+              </div>
+              <div class="field"><label>Structural layout</label><input name="structuralLayout" value="Subject to approved engineering and field measurements"></div>
+            </div>
+            <div class="grid-3" style="margin-top:14px">
+              <div class="field"><label>Number of posts</label><input name="posts" type="number" min="0" placeholder="4"></div>
+              <div class="field"><label>Ceiling fans</label><input name="fans" type="number" min="0" value="0"></div>
+              <div class="field"><label>Recessed lights</label><input name="lights" type="number" min="0" value="0"></div>
+            </div>
+          </section>
+
+          <section class="step conditional" data-id="screens" data-title="Screens" data-services="Regular Screens|Motorized Screens">
+            <div class="eyebrow">Screens</div>
+            <h1>Screen opening details</h1>
+            <p class="lead">Standard screen width is up to 16 ft. Any opening wider than 16 ft should be marked jumbo or divided into smaller openings.</p>
+            <div class="grid-3">
+              <div class="field"><label>How many walls/openings?</label><select name="screenWallCount" id="screenWallCount">
+                <option value="1">1 wall</option><option value="2">2 walls</option><option value="3">3 walls</option><option value="4">4 walls</option>
+              </select></div>
+              <div class="field"><label>Installed on</label>
+                <select name="screenInstalledOn"><option>New Easy Pergola structure</option><option>Existing pergola / patio opening</option><option>Mixed new and existing openings</option></select>
+              </div>
+              <div class="field"><label>Screen frame / mesh color</label><input name="screenColor" placeholder="Example: Bronze frame, black mesh"></div>
+            </div>
+            <div class="callout"><b>Standard-size rule:</b> the longest standard screen is 16 ft. If an opening exceeds 16 ft, choose “Jumbo” or plan to split the wall into two screens.</div>
+            <div id="screenWalls"></div>
+            <div id="motorizedOptions" class="panel" style="margin-top:14px">
+              <div class="grid-3">
+                <div class="field"><label>Power available nearby?</label><select name="screenPower"><option>Yes</option><option>No</option><option>Needs electrician to confirm</option></select></div>
+                <div class="field"><label>Operation</label><select name="screenOperation"><option>Remote control</option><option>Wall switch</option><option>Remote and wall switch</option><option>Not decided</option></select></div>
+                <div class="field"><label>Electrical included?</label><select name="screenElectrical"><option>Included</option><option>By homeowner / others</option><option>Not decided</option></select></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="step conditional" data-id="concrete" data-title="Concrete / Pavers" data-services="Concrete Slab|Pavers">
+            <div class="eyebrow">Concrete / Pavers</div>
+            <h1>Slab and hardscape details</h1>
+            <p class="lead">Answer only what applies. These questions cover area, preparation, and connection to existing work.</p>
+            <div id="concreteFields">
+              <h2>Concrete slab</h2>
+              <div class="grid-3">
+                <div class="field"><label>Approximate square feet</label><input name="concreteSf" type="number" min="0" placeholder="480"></div>
+                <div class="field"><label>Thickness</label><select name="concreteThickness"><option>4 inches</option><option>5 inches</option><option>6 inches</option><option>Engineer to specify</option><option>Not decided</option></select></div>
+                <div class="field"><label>New slab or extension?</label><select name="concreteType"><option>New separate slab</option><option>Extension of existing slab</option><option>Repair / replacement area</option><option>Not decided</option></select></div>
+                <div class="field"><label>Does the field need preparation?</label><select name="fieldPreparation"><option>Yes — grading / excavation / base preparation</option><option>No — area is ready</option><option>Needs site verification</option></select></div>
+                <div class="field"><label>Attach to existing slab?</label><select name="attachExistingSlab"><option>Yes</option><option>No</option><option>Engineer / field condition to determine</option></select></div>
+                <div class="field"><label>Existing concrete demolition?</label><select name="concreteDemo"><option>No</option><option>Yes</option><option>Needs site verification</option></select></div>
+                <div class="field"><label>Reinforcement</label><select name="concreteReinforcement"><option>Wire mesh</option><option>Rebar</option><option>Fiber reinforcement</option><option>Engineer to specify</option><option>Not decided</option></select></div>
+                <div class="field"><label>Finish</label><select name="concreteFinish"><option>Broom finish</option><option>Smooth finish</option><option>Tile-ready</option><option>Paver-ready</option><option>Custom</option></select></div>
+                <div class="field"><label>Truck/pump access</label><select name="concreteAccess"><option>Direct truck access</option><option>Concrete pump may be needed</option><option>Wheelbarrow / limited access</option><option>Needs site verification</option></select></div>
+              </div>
+            </div>
+            <div id="paverFields" style="margin-top:20px">
+              <h2>Pavers</h2>
+              <div class="grid-3">
+                <div class="field"><label>Approximate square feet</label><input name="paverSf" type="number" min="0" placeholder="480"></div>
+                <div class="field"><label>Work type</label><select name="paverType"><option>Remove and reset existing pavers</option><option>Install new pavers</option><option>Remove only</option><option>Repair selected areas</option><option>Not decided</option></select></div>
+                <div class="field"><label>Matching existing pavers?</label><select name="paverMatch"><option>Use existing pavers</option><option>New matching pavers needed</option><option>New contrasting pavers</option><option>Not decided</option></select></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="step conditional" data-id="electrical" data-title="Electrical" data-services="Electrical">
+            <div class="eyebrow">Electrical</div>
+            <h1>Electrical details</h1>
+            <p class="lead">Capture the main load, controls, and whether existing power is available.</p>
+            <div class="grid-3">
+              <div class="field"><label>Existing power nearby?</label><select name="powerNearby"><option>Yes</option><option>No</option><option>Needs electrician to verify</option></select></div>
+              <div class="field"><label>New circuit required?</label><select name="newCircuit"><option>No</option><option>Yes</option><option>Needs electrician to verify</option></select></div>
+              <div class="field"><label>Panel upgrade expected?</label><select name="panelUpgrade"><option>No</option><option>Possibly</option><option>Yes</option><option>Needs electrician to verify</option></select></div>
+              <div class="field"><label>Fans</label><input name="electricalFans" type="number" min="0" placeholder="2"></div>
+              <div class="field"><label>Lights</label><input name="electricalLights" type="number" min="0" placeholder="8"></div>
+              <div class="field"><label>Outlets / appliance connections</label><input name="electricalOutlets" placeholder="Example: 2 outlets + refrigerator"></div>
+              <div class="field"><label>Switch setup</label><input name="switchSetup" placeholder="Example: separate fan and light switches"></div>
+              <div class="field"><label>Electrical permit</label><select name="electricalPermit"><option>Included with contractor permit</option><option>Homeowner responsibility</option><option>By licensed electrician / others</option><option>Not decided</option></select></div>
+              <div class="field"><label>Who completes final connections?</label><select name="finalConnections"><option>Contractor / licensed electrician</option><option>Homeowner's electrician</option><option>Not decided</option></select></div>
+            </div>
+          </section>
+
+          <section class="step conditional" data-id="kitchenBathroom" data-title="Kitchen / Bathroom" data-services="Outdoor Kitchen|Outdoor Bathroom">
+            <div class="eyebrow">Kitchen / Bathroom</div>
+            <h1>Outdoor room details</h1>
+            <p class="lead">Only fill the parts included in this project.</p>
+            <div id="kitchenFields">
+              <h2>Outdoor kitchen</h2>
+              <div class="grid-3">
+                <div class="field"><label>Approximate length / layout</label><input name="kitchenLayout" placeholder="Example: 12 ft straight kitchen"></div>
+                <div class="field"><label>Cabinet structure</label><select name="kitchenCabinets"><option>Aluminum frame with finish panels</option><option>Masonry / block</option><option>Prefabricated cabinets</option><option>Custom / Not decided</option></select></div>
+                <div class="field"><label>Countertop material</label><input name="countertop" placeholder="Example: Pure white quartz"></div>
+                <div class="field"><label>Appliances included</label><input name="appliances" placeholder="Grill, fridge, sink, smoker..."></div>
+                <div class="field"><label>Plumbing included?</label><select name="kitchenPlumbing"><option>No</option><option>Yes</option><option>By homeowner / others</option><option>Not decided</option></select></div>
+                <div class="field"><label>Gas connection included?</label><select name="kitchenGas"><option>No</option><option>Yes</option><option>By homeowner / others</option><option>Not decided</option></select></div>
+              </div>
+            </div>
+            <div id="bathroomFields" style="margin-top:20px">
+              <h2>Outdoor bathroom</h2>
+              <div class="grid-3">
+                <div class="field"><label>Room size</label><input name="bathroomSize" placeholder="Example: 4x5 ft"></div>
+                <div class="field"><label>Fixtures</label><input name="bathroomFixtures" placeholder="Toilet, small vanity, shower..."></div>
+                <div class="field"><label>Waste connection</label><select name="wasteConnection"><option>Existing sewer connection</option><option>New septic / holding system</option><option>Needs plumber to verify</option><option>Not decided</option></select></div>
+                <div class="field"><label>Water connection</label><select name="waterConnection"><option>Existing water nearby</option><option>New water run needed</option><option>Needs plumber to verify</option></select></div>
+                <div class="field"><label>Bathroom walls / roof</label><input name="bathroomStructure" placeholder="Example: insulated aluminum panels"></div>
+                <div class="field"><label>Interior finish</label><input name="bathroomFinish" placeholder="Simple waterproof finish"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="step conditional" data-id="decorative" data-title="Wall / Fence" data-services="Decorative Wall / Fence">
+            <div class="eyebrow">Decorative Wall / Fence</div>
+            <h1>Wall, fence, or enclosure details</h1>
+            <p class="lead">Use this for privacy walls, storage enclosures, pool-equipment covers, or decorative panels.</p>
+            <div class="grid-3">
+              <div class="field"><label>Type</label><select name="decorativeType"><option>Privacy wall</option><option>Fence</option><option>Pool-equipment enclosure</option><option>Storage enclosure</option><option>Decorative panel wall</option><option>Other</option></select></div>
+              <div class="field"><label>Length</label><input name="decorativeLength" placeholder="20 ft"></div>
+              <div class="field"><label>Height</label><input name="decorativeHeight" placeholder="6 ft"></div>
+              <div class="field"><label>Material</label><input name="decorativeMaterial" placeholder="Aluminum panels, PVC slats..."></div>
+              <div class="field"><label>Color / finish</label><input name="decorativeFinish" placeholder="Bronze, wood-look..."></div>
+              <div class="field"><label>Gate or access door?</label><select name="decorativeGate"><option>No</option><option>Yes</option><option>Not decided</option></select></div>
+            </div>
+          </section>
+
+          <section class="step conditional" data-id="flooring" data-title="Flooring / Turf" data-services="Flooring / Turf / Landscaping">
+            <div class="eyebrow">Flooring / Turf / Landscaping</div>
+            <h1>Finish-work details</h1>
+            <p class="lead">Keep this page simple and describe the area and finish.</p>
+            <div class="grid-3">
+              <div class="field"><label>Service type</label><select name="finishService"><option>Tile flooring</option><option>Artificial turf</option><option>Landscaping</option><option>Mixed finish work</option></select></div>
+              <div class="field"><label>Approximate square feet</label><input name="finishSf" type="number" min="0"></div>
+              <div class="field"><label>Material / style</label><input name="finishMaterial" placeholder="Tile, turf type, plants..."></div>
+            </div>
+            <div class="field" style="margin-top:14px"><label>Preparation or demolition needed?</label><textarea name="finishPreparation" placeholder="Describe removal, leveling, mortar bed, base, drainage, or other preparation."></textarea></div>
+          </section>
+
+          <section class="step" data-id="responsibilities" data-title="Approvals">
+            <div class="eyebrow">Approvals</div>
+            <h1>Who handles permits and engineering?</h1>
+            <p class="lead">Permit responsibility has only two choices. Engineering can be contractor, homeowner, or excluded.</p>
+            <div class="grid-3">
+              <div class="field"><label>Permit responsibility</label>
+                <select name="permitResponsibility"><option value="">Choose one</option><option>Contractor responsibility</option><option>Homeowner responsibility</option></select>
+              </div>
+              <div class="field"><label>Engineering responsibility</label>
+                <select name="engineeringResponsibility"><option value="">Choose one</option><option>Contractor responsibility — included</option><option>Homeowner responsibility</option><option>Not included</option></select>
+              </div>
+              <div class="field"><label>HOA responsibility</label>
+                <select name="hoaResponsibility"><option value="">Choose one</option><option>Homeowner responsibility</option><option>Contractor responsibility — included</option><option>Not applicable</option></select>
+              </div>
+            </div>
+            <div class="callout"><b>Homeowner permit option:</b> the final agreement should require homeowner initials and clearly assign permits, inspections, governmental approvals, and related delays or costs.</div>
+            <div class="choice-grid" id="surveyChoice">
+              <div class="choice selected" data-value="Homeowner responsibility"><div class="choice-title">Survey and property lines: homeowner</div><small>Default. Easy Pergola does not verify surveys, easements, setbacks, or property lines.</small></div>
+              <div class="choice" data-value="Included by contractor"><div class="choice-title">Survey included by contractor</div><small>Use only when this is specifically included in the price.</small></div>
+            </div>
+            <input type="hidden" name="surveyResponsibility" value="Homeowner responsibility">
+          </section>
+
+          <section class="step" data-id="scope" data-title="Scope">
+            <div class="eyebrow">Scope</div>
+            <h1>Confirm the scope table</h1>
+            <p class="lead">This is the final included/excluded table. Common defaults are already applied.</p>
+            <div class="scope-list" id="scopeList"></div>
+            <div class="mini-actions">
+              <button type="button" class="mini-btn" id="refreshScope">Refresh from selected services</button>
+              <button type="button" class="mini-btn" id="clearScope">Clear statuses</button>
+            </div>
+          </section>
+
+          <section class="step" data-id="price" data-title="Price">
+            <div class="eyebrow">Price</div>
+            <h1>Price and payment schedule</h1>
+            <p class="lead">The deposit plus balance must equal the total contract price.</p>
+            <div class="grid-3">
+              <div class="field"><label>Contract price</label><input name="contractPrice" type="number" min="0" step="0.01" placeholder="24500"></div>
+              <div class="field"><label>Deposit due</label><input name="deposit" type="number" min="0" step="0.01" placeholder="5000"></div>
+              <div class="field"><label>Balance due</label><input name="balance" type="number" min="0" step="0.01" placeholder="19500"></div>
+            </div>
+            <div class="grid-2" style="margin-top:14px">
+              <div class="field"><label>Payment method</label><select name="paymentMethod"><option>Cash / Check</option><option>Credit card</option><option>Financing</option><option>Combination</option></select></div>
+              <div class="field"><label>Financing company <span class="hint">(if applicable)</span></label><input name="financeCompany" placeholder="GoodLeap, PACE, Service Finance..."></div>
+            </div>
+            <div class="field" style="margin-top:14px"><label>Payment terms</label><textarea name="paymentTerms" placeholder="Example: $5,000 due at signing. Remaining balance due upon substantial completion."></textarea></div>
+            <div class="warning" id="paymentWarning"></div>
+          </section>
+
+          <section class="step" data-id="schedule" data-title="Schedule">
+            <div class="eyebrow">Schedule & Attachments</div>
+            <h1>Final project information</h1>
+            <p class="lead">Good-faith estimates are enough. Add images or renderings for the contract when available.</p>
+            <div class="grid-2">
+              <div class="field"><label>Estimated start</label><input name="estimatedStart" placeholder="4–6 weeks after approvals"></div>
+              <div class="field"><label>Estimated completion</label><input name="estimatedCompletion" placeholder="2–3 working days after installation begins"></div>
+              <div class="field"><label>Company representative</label><input name="companyRep" placeholder="Authorized signer"></div>
+              <div class="field"><label>Cancellation deadline <span class="hint">(optional)</span></label><input name="cancellationDeadline" type="date"></div>
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label>Project images or renderings <span class="hint">(test only)</span></label>
+              <input id="fileInput" type="file" multiple accept="image/*,.pdf">
+              <div class="file-list" id="fileList">No files selected.</div>
+            </div>
+            <div class="grid-2" style="margin-top:14px">
+              <div class="field"><label>Image label</label><select name="imageLabel"><option>Conceptual rendering</option><option>Approved design rendering</option><option>Existing site photograph</option><option>Reference image only</option></select></div>
+              <div class="field"><label>Whole-property cleanup included?</label><select name="cleanup"><option>No — normal jobsite cleanup only</option><option>Yes — specifically included</option></select></div>
+            </div>
+            <div class="field" style="margin-top:14px"><label>Additional exclusions or clarifications</label><textarea name="clarifications" placeholder="Anything special that should be clearly stated in the agreement."></textarea></div>
+          </section>
+
+          <section class="step" data-id="review" data-title="Review">
+            <div class="eyebrow">Review</div>
+            <h1>Review before creating the contract</h1>
+            <p class="lead">Check the details below, then create the agreement.</p>
+            <div class="summary" id="summary"></div>
+            <div class="warning" id="reviewWarning"></div>
+            <div class="mini-actions">
+              <button type="button" class="mini-btn" id="downloadJson">Download intake data</button>
+              <button type="button" class="mini-btn" id="printSummary">Print summary</button>
+            </div>
+          </section>
+
+
+          <section class="step" data-id="contract" data-title="Contract">
+            <div class="eyebrow">Contract</div>
+            <h1>Your agreement is ready</h1>
+            <p class="lead">This is the finished contract, not a summary. Adjust anything below and it rebuilds instantly.</p>
+            <div class="warning" id="contractWarning"></div>
+            <div class="contract-box" id="contractBox"></div>
+
+            <details class="adjust">
+              <summary>Adjust price, terms, or scope</summary>
+              <div id="adjustPanel"></div>
+            </details>
+
+            <div class="action-row">
+              <button type="button" class="btn btn-secondary" id="sendMeBtn">Email a copy to me</button>
+              <button type="button" class="btn btn-secondary" id="downloadBtn">Download PDF</button>
+              <button type="button" class="btn btn-secondary" id="copyBtn">Copy for email</button>
+            </div>
+          </section>
+
+          <section class="step" data-id="sign" data-title="Your signature">
+            <div class="eyebrow">Your signature</div>
+            <h1>Sign the agreement</h1>
+            <p class="lead">You sign first. The client receives the contract already bearing your signature and adds theirs.</p>
+            <div class="grid-2">
+              <div class="field"><label>Signing on behalf of Easy Pergola</label>
+                <input id="signerName" placeholder="Authorized signer"></div>
+            </div>
+            <div class="pad-wrap">
+              <canvas class="pad" id="epPad"></canvas>
+              <div class="pad-hint">Sign here</div>
+            </div>
+            <div class="mini-actions"><button type="button" class="mini-btn" id="epClear">Clear signature</button></div>
+            <div class="warning" id="signWarning"></div>
+          </section>
+
+          <section class="step" data-id="send" data-title="Send">
+            <div class="eyebrow">Final step</div>
+            <h1>Send it to the client</h1>
+            <p class="lead">The client opens a link, reads the agreement, and signs on their phone. The executed copy returns to you.</p>
+            <div class="callout" id="sendSummary"></div>
+            <div class="contract-box" id="sendPreview"></div>
+            <div class="action-row">
+              <button type="button" class="btn btn-primary" id="sendClientBtn">Send to client for signature</button>
+            </div>
+          </section>
+
+          <section class="step" data-id="complete" data-title="Complete">
+            <div class="done">
+              <div class="done-icon">&#10003;</div>
+              <h1 id="doneTitle">Agreement sent</h1>
+              <p class="lead" id="doneText" style="margin-left:auto;margin-right:auto"></p>
+              <button type="button" class="btn btn-secondary" id="restartBtn">Start another agreement</button>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="footer">
+          <button type="button" class="btn btn-secondary" id="backBtn">Back</button>
+          <div class="footer-right"><button type="button" class="btn btn-primary" id="nextBtn">Continue</button></div>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+
+
+<div class="modal" id="settings" hidden>
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <h2 id="setTitle" style="margin-top:0">Company settings</h2>
+    <p class="hint">Stored in this browser only — never committed to the repo.</p>
+
+    <div class="grid-2" style="margin-top:14px">
+      <div class="field"><label>Send my copy to</label><input type="email" id="setMyEmail" placeholder="you@easypergola.com"></div>
+      <div class="field"><label>Worker URL <span class="hint">(enables one-click sending)</span></label><input type="url" id="setEndpoint" placeholder="https://contracts.example.workers.dev"></div>
+      <div class="field"><label>Operator token</label><input type="password" id="setToken" autocomplete="off"></div>
+      <div class="field"><label>Trade name</label><input type="text" id="setName"></div>
+      <div class="field"><label>Legal name</label><input type="text" id="setLegal"></div>
+      <div class="field"><label>Florida license #</label><input type="text" id="setLicense"></div>
+      <div class="field"><label>Phone</label><input type="tel" id="setPhone"></div>
+      <div class="field"><label>Email</label><input type="email" id="setEmail"></div>
+    </div>
+    <div class="field" style="margin-top:14px"><label>Address</label><input type="text" id="setAddress"></div>
+    <div class="grid-2" style="margin-top:14px">
+      <div class="field"><label>City</label><input type="text" id="setCity"></div>
+      <div class="field"><label>ZIP</label><input type="text" id="setZip"></div>
+    </div>
+
+    <div class="action-row">
+      <button type="button" class="btn btn-primary" id="setSave">Save</button>
+      <button type="button" class="btn btn-secondary" id="setCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="assets/js/pergola-form.js"></script>
+</body>
+</html>
